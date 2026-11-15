@@ -114,8 +114,13 @@ const sizes = size === 'big' ? '(max-width: 1080px) 100vw, 1000px' : '(max-width
     height: 49px;
   }
 
+  /* Pfeil fliegt beim Hover 40px von links an seinen Platz und wird sichtbar */
   .icon-hover {
     opacity: 0;
+    transform: translateX(-40px);
+    transition:
+      opacity 0.3s ease,
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .text {
@@ -157,5 +162,12 @@ const sizes = size === 'big' ? '(max-width: 1080px) 100vw, 1000px' : '(max-width
   .card:hover .icon-hover,
   .card:focus-visible .icon-hover {
     opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .icon-hover {
+      transform: none;
+    }
   }
 </style>

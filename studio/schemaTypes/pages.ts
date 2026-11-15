@@ -233,3 +233,27 @@ export const settings = defineType({
   ],
   preview: {prepare: () => ({title: 'Footer & Kontaktdaten'})},
 })
+
+/* ---------------- Website aktualisieren ---------------- */
+
+export const deployTrigger = defineType({
+  name: 'deployTrigger',
+  title: 'Website aktualisieren',
+  type: 'document',
+  readOnly: true,
+  fields: [
+    defineField({
+      name: 'requestedAt',
+      title: 'Zuletzt aktualisiert',
+      description:
+        'Unten rechts auf „Alles veröffentlichen & Website aktualisieren“ klicken: Alle offenen Änderungen werden veröffentlicht und die Website einmal neu gebaut (ca. 2 Minuten). Einzelnes „Publish“ in den anderen Dokumenten speichert nur – online geht es erst mit diesem Button.',
+      type: 'datetime',
+    }),
+    defineField({
+      name: 'publishedCount',
+      title: 'Dabei veröffentlichte Änderungen',
+      type: 'number',
+    }),
+  ],
+  preview: {prepare: () => ({title: 'Website aktualisieren'})},
+})

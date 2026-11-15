@@ -11,6 +11,8 @@ import {ImagesIcon} from '@sanity/icons/Images'
 import {InfoOutlineIcon} from '@sanity/icons/InfoOutline'
 import {PresentationIcon} from '@sanity/icons/Presentation'
 import {UserIcon} from '@sanity/icons/User'
+import {RocketIcon} from '@sanity/icons/Rocket'
+import {publishAllAction} from './actions/publishAllAction'
 import {schemaTypes, singletonTypes} from './schemaTypes'
 
 // Projekt-ID aus sanity.io/manage – per Umgebungsvariable überschreibbar
@@ -83,6 +85,8 @@ export default defineConfig({
             singleton(S, 'about', 'about', 'About & Contact', UserIcon),
             singleton(S, 'legal', 'legal', 'Impressum (Legal Notice)', InfoOutlineIcon),
             S.divider(),
+            singleton(S, 'deploy', 'deployTrigger', 'Website aktualisieren', RocketIcon),
+            S.divider(),
             S.listItem()
               .title('Auf allen Seiten')
               .id('global')
@@ -112,9 +116,13 @@ export default defineConfig({
 
   document: {
     // Einzelseiten: kein Duplizieren/Löschen
-    actions: (input, context) =>
-      singletonTypes.has(context.schemaType)
-        ? input.filter(({action}) => action && ['publish', 'discardChanges', 'restore'].includes(action))
-        : input,
+    actions: (input, context) => {
+      // „Website aktualisieren“: nur der grosse Button
+      if (context.schemaType === 'deployTrigger') return [publishAllAction]
+      // Einzelseiten: kein Duplizieren/Löschen
+      if (singletonTypes.has(context.schemaType))
+        return input.filter(({action}) => action && ['publish', 'discardChanges', 'restore'].includes(action))
+      return input
+    },
   },
 })

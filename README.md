@@ -36,10 +36,15 @@ Design
 About & Contact            Porträt, Begrüssung, Einleitung, Text, Illustration beim Formular
 Impressum (Legal Notice)   Name, Adresse, weitere Abschnitte
 ──────────
+──────────
+Website aktualisieren      ein Button: alles veröffentlichen + 1 Deploy
+──────────
 Auf allen Seiten
   ├ Kontakt-Block          gelber Block unten: Illustration, Titel
   └ Footer & Kontaktdaten  Untertitel, E-Mail, Instagram
 ```
+
+**Arbeitsweise:** Inhalte bearbeiten (Entwürfe bleiben gespeichert) → „Website aktualisieren“ → Button „Alles veröffentlichen & Website aktualisieren“. Das veröffentlicht alle Entwürfe auf einmal und löst genau **einen** Netlify-Build aus (spart Netlify-Credits).
 
 - Projekte haben zwei Reiter: **Projektkarte** (Titel, Titelbild, Schlagworte) und **Projektseite** (Beschreibung, Bilder, Adresse).
 - „Neues Projekt“ in einer Projektliste setzt den Bereich automatisch.
@@ -64,13 +69,14 @@ Repository mit diesem Code (Kendra ist Owner, Luis Collaborator).
 3. **Build & deploy → Build hooks** → Hook „Sanity“ anlegen, URL kopieren.
 4. **Forms** → Formularerkennung aktivieren; unter *Form notifications* E-Mail an Kendra einrichten.
 
-### 4. Automatisch neu bauen, wenn Kendra veröffentlicht
+### 4. Neu bauen über den Button „Website aktualisieren“
 sanity.io/manage → **API → Webhooks → Create webhook**
 - URL: Build-Hook aus Schritt 3.3
-- Dataset: `production`, Trigger: Create, Update, Delete
+- Dataset: `production`, Trigger: Create, Update
+- **Filter: `_type == "deployTrigger"`** – sonst baut jedes einzelne „Publish“ neu
 - HTTP-Methode: POST
 
-Nach dem Veröffentlichen in Sanity ist die Änderung nach ca. 1–2 Minuten online.
+Nach dem Klick auf den Button ist die Website nach ca. 2 Minuten aktualisiert.
 
 ### 5. Domain (Infomaniak)
 Netlify → **Domain management → Add domain** → DNS-Einträge bei Infomaniak setzen, wie Netlify sie anzeigt. Die Mail-Einträge (MX) bei Infomaniak bleiben unverändert.

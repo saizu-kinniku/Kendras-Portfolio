@@ -3,6 +3,9 @@ import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import type { SiteImage } from '../data/projects';
+// Schriften früh laden, damit nichts nachspringt
+import fontHead from '@fontsource/stack-sans-headline/files/stack-sans-headline-latin-400-normal.woff2?url';
+import fontBody from '@fontsource/syne/files/syne-latin-400-normal.woff2?url';
 
 interface Props {
   title?: string;
@@ -33,6 +36,8 @@ const ogImage = image ? image.src.replace(/w=\d+/, 'w=1200') : undefined;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={fontHead} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontBody} as="font" type="font/woff2" crossorigin />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {canonical && <link rel="canonical" href={canonical} />}

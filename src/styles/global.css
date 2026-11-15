@@ -74,21 +74,19 @@ body > footer {
   animation: page-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Nav nur einblenden (ohne Verschieben, wegen des fixierten Mobile-Menüs) */
-@keyframes page-fade {
-  from {
-    opacity: 0;
-  }
+/* Die Navigation bleibt beim Seitenwechsel stehen (kein Überblenden, kein Zucken) */
+body > header {
+  view-transition-name: site-header;
 }
 
-body > header {
-  animation: page-fade 0.5s ease both;
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   body > main,
-  body > footer,
-  body > header {
+  body > footer {
     animation: none;
   }
 
