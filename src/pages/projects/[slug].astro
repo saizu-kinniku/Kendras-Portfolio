@@ -20,7 +20,7 @@ const { project } = Astro.props;
 const other = project.category === 'illustration' ? 'design' : 'illustration';
 ---
 
-<Base title={project.title} active={project.category}>
+<Base title={project.title} active={project.category} description={project.description} image={project.cover}>
   <section class="project">
     <header class="intro">
       <h1 class="t-headline">{project.title}</h1>

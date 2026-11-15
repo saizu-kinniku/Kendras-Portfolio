@@ -30,10 +30,72 @@
   --space-m: clamp(32px, 20px + 2.6vw, 60px); /* 60 */
   --space-s: clamp(24px, 16px + 1.6vw, 40px); /* 40 */
 
+  /* Höhe der Navigationsleiste (für Hero = Bildschirmhöhe) */
+  --nav-h: 100px;
+
   /* Breakpoints (nur Doku – in Media Queries als Zahl): Tablet ≤ 1100px, Burger ≤ 960px, Mobile ≤ 700px */
   --radius-card: 30px;
   --radius-button: 40px;
   --radius-input: 10px;
+}
+
+@media (max-width: 960px) {
+  :root {
+    --nav-h: 80px;
+  }
+}
+
+/* ---------- Seitenübergänge ---------- */
+/* Zwischen Seiten: weicher Überblend-Effekt (Chrome, Edge, Safari; andere Browser wechseln normal) */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.45s;
+  animation-timing-function: ease;
+}
+
+/* Beim Laden: Inhalt blendet sanft ein */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+body > main,
+body > footer {
+  animation: page-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Nav nur einblenden (ohne Verschieben, wegen des fixierten Mobile-Menüs) */
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+body > header {
+  animation: page-fade 0.5s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body > main,
+  body > footer,
+  body > header {
+    animation: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
 }
 
 /* ---------- Reset ---------- */
@@ -68,6 +130,7 @@ p {
 img {
   display: block;
   max-width: 100%;
+  height: auto; /* width/height-Attribute nur fürs Seitenverhältnis */
 }
 
 a {

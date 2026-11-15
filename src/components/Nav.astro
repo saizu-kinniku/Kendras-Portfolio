@@ -83,7 +83,7 @@ const items = [
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 100px;
+    height: var(--nav-h);
     padding: 0 var(--page-pad);
   }
 
@@ -176,10 +176,6 @@ const items = [
   }
 
   @media (max-width: 960px) {
-    .nav {
-      height: 80px;
-    }
-
     .links {
       display: none;
     }

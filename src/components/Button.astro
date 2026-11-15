@@ -4,15 +4,23 @@ interface Props {
   href?: string;
   type?: 'button' | 'submit';
   download?: boolean;
+  /** In neuem Tab öffnen (PDFs, externe Links) */
+  newTab?: boolean;
   class?: string;
 }
 
-const { href, type = 'button', download, class: className } = Astro.props;
+const { href, type = 'button', download, newTab = false, class: className } = Astro.props;
 ---
 
 {
   href ? (
-    <a class:list={['button', className]} href={href} download={download || undefined}>
+    <a
+      class:list={['button', className]}
+      href={href}
+      download={download || undefined}
+      target={newTab ? '_blank' : undefined}
+      rel={newTab ? 'noopener' : undefined}
+    >
       <slot />
     </a>
   ) : (

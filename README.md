@@ -23,16 +23,28 @@ Mit `SANITY_PROJECT_ID="" npm run dev` läuft die Website ohne Sanity, nur mit P
 
 ## Inhalte (Sanity)
 
-| Im Studio | Wo auf der Website |
-|---|---|
-| **Illustration / Design** – Projekte, per Drag & Drop sortierbar | Übersichtsseiten, Projektseiten |
-| **Startseite** – Hero-Bild, Introtext, „Selected works“ | Startseite |
-| **About & Contact** – Porträt, Texte, Illustration beim Formular | About-Seite |
-| **Impressum** – Name, Adresse, weitere Angaben | Legal Notice |
-| **Allgemein** – Mail, Instagram, PDFs, Header-Bilder, Kontakt-Block | überall |
+Das Studio ist aufgebaut wie die Website – Seiten in der Reihenfolge der Navigation, Felder in der Reihenfolge, in der sie auf der Seite erscheinen:
 
-Bilder: Fokuspunkt (Hotspot) setzen – danach richtet sich der Bildausschnitt auf Desktop und Mobile.
-Leere Felder fallen auf die Platzhalter in `src/data/projects.ts` zurück.
+```
+Startseite                 Hero-Bild, Introtext, Selected works
+Illustration
+  ├ Seite                  Header-Bild, PDF-Portfolio
+  └ Projekte               sortierbar per Drag & Drop
+Design
+  ├ Seite                  Header-Bild, PDF-Portfolio
+  └ Projekte
+About & Contact            Porträt, Begrüssung, Einleitung, Text, Illustration beim Formular
+Impressum (Legal Notice)   Name, Adresse, weitere Abschnitte
+──────────
+Auf allen Seiten
+  ├ Kontakt-Block          gelber Block unten: Illustration, Titel
+  └ Footer & Kontaktdaten  Untertitel, E-Mail, Instagram
+```
+
+- Projekte haben zwei Reiter: **Projektkarte** (Titel, Titelbild, Schlagworte) und **Projektseite** (Beschreibung, Bilder, Adresse).
+- „Neues Projekt“ in einer Projektliste setzt den Bereich automatisch.
+- Bilder: Fokuspunkt (Hotspot) setzen – danach richtet sich der Ausschnitt auf Desktop und Mobile.
+- Leere Felder fallen auf Platzhalter zurück; fehlt ein PDF, werden die PDF-Buttons ausgeblendet.
 
 ## Einmalige Einrichtung
 
@@ -83,4 +95,4 @@ Breakpoints: Tablet ≤ 1100px · Burger-Menü ≤ 960px · Mobile ≤ 700px
 ## Offen vor dem Launch
 
 - Datenschutzerklärung (Kontaktformular)
-- Favicon, Social-Vorschaubild, Sitemap, 404-Seite, Danke-Seite fürs Formular
+- Favicon

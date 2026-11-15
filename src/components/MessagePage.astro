@@ -1,0 +1,50 @@
+---
+/** Schlichte Hinweisseite (404, Danke nach dem Kontaktformular) im Stil der übrigen Seiten */
+import Base from '../layouts/Base.astro';
+import Button from './Button.astro';
+
+interface Props {
+  pageTitle: string;
+  headline: string;
+  buttonLabel: string;
+  buttonHref: string;
+}
+
+const { pageTitle, headline, buttonLabel, buttonHref } = Astro.props;
+---
+
+<Base title={pageTitle} noindex>
+  <section class="message">
+    <h1 class="t-headline">{headline}</h1>
+    <p class="t-body text"><slot /></p>
+    <Button href={buttonHref}>{buttonLabel}</Button>
+  </section>
+</Base>
+
+<style>
+  .message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-s);
+    min-height: calc(100svh - var(--nav-h) - 200px);
+    padding: var(--space-xl) var(--page-pad);
+    text-align: center;
+  }
+
+  .message h1 {
+    color: var(--c-orange);
+  }
+
+  .text {
+    max-width: 560px;
+    color: var(--c-offblack);
+  }
+
+  @media (max-width: 700px) {
+    .message :global(.button) {
+      width: auto;
+    }
+  }
+</style>

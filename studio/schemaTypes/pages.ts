@@ -1,20 +1,30 @@
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
-const imageWithAlt = (name: string, title: string, description?: string) =>
+/* Die Felder stehen jeweils in der Reihenfolge, in der sie auf der Website erscheinen (von oben nach unten). */
+
+const imageField = (name: string, title: string, description: string) =>
   defineField({
     name,
     title,
     description,
     type: 'image',
     options: {hotspot: true},
-    fields: [defineField({name: 'alt', title: 'Bildbeschreibung', type: 'string'})],
+    fields: [
+      defineField({
+        name: 'alt',
+        title: 'Bildbeschreibung',
+        description: 'Kurz beschreiben, was zu sehen ist – für Screenreader und Suchmaschinen.',
+        type: 'string',
+      }),
+    ],
   })
 
-/** Einfacher Fliesstext mit Zwischentiteln, fett/kursiv und Links */
-const richText = (name: string, title: string) =>
+/** Fliesstext mit Zwischentiteln, fett/kursiv und Links */
+const richText = (name: string, title: string, description?: string) =>
   defineField({
     name,
     title,
+    description,
     type: 'array',
     of: [
       defineArrayMember({
@@ -34,7 +44,14 @@ const richText = (name: string, title: string) =>
               name: 'link',
               type: 'object',
               title: 'Link',
-              fields: [{name: 'href', type: 'url', title: 'URL', validation: (rule) => rule.uri({scheme: ['http', 'https', 'mailto', 'tel']})}],
+              fields: [
+                {
+                  name: 'href',
+                  type: 'url',
+                  title: 'URL',
+                  validation: (rule) => rule.uri({scheme: ['http', 'https', 'mailto', 'tel']}),
+                },
+              ],
             },
           ],
         },
@@ -42,15 +59,23 @@ const richText = (name: string, title: string) =>
     ],
   })
 
+/* ---------------- Startseite ---------------- */
+
 export const home = defineType({
   name: 'home',
   title: 'Startseite',
   type: 'document',
   fields: [
-    imageWithAlt('heroImage', 'Hero-Bild', 'Desktop im Querformat (16:9), auf dem Handy hochformatig (4:5) – Fokuspunkt setzen.'),
+    imageField(
+      'heroImage',
+      'Hero-Bild',
+      'Grosses Bild ganz oben, füllt den ganzen Bildschirm. Auf dem Handy wird es hochformatig zugeschnitten – mit dem Fokuspunkt (Kreis-Symbol) bestimmst du, was sichtbar bleibt.',
+    ),
     defineField({
       name: 'intro',
       title: 'Introtext',
+      description:
+        'Steht unten links im Hero. Die zwei PDF-Buttons darunter verlinken die PDFs aus „Illustration → Seite“ und „Design → Seite“.',
       type: 'text',
       rows: 3,
       initialValue:
@@ -59,7 +84,8 @@ export const home = defineType({
     defineField({
       name: 'selectedWorks',
       title: 'Selected works',
-      description: 'Projekte, die auf der Startseite erscheinen (Reihenfolge per Drag & Drop).',
+      description:
+        'Projekte, die auf der Startseite gross gezeigt werden. Reihenfolge per Drag & Drop. Leer = die ersten drei Projekte.',
       type: 'array',
       of: [defineArrayMember({type: 'reference', to: [{type: 'project'}]})],
       validation: (rule) => rule.max(6).unique(),
@@ -68,24 +94,66 @@ export const home = defineType({
   preview: {prepare: () => ({title: 'Startseite'})},
 })
 
+/* ---------------- Übersichtsseiten Illustration / Design ---------------- */
+
+export const categoryPage = defineType({
+  name: 'categoryPage',
+  title: 'Übersichtsseite',
+  type: 'document',
+  fields: [
+    imageField(
+      'headerImage',
+      'Header-Bild',
+      'Breites Bild ganz oben auf der Seite (ca. 4:1). Fokuspunkt setzen, damit auf dem Handy das Wichtige sichtbar bleibt.',
+    ),
+    defineField({
+      name: 'pdf',
+      title: 'PDF-Portfolio',
+      description:
+        'Wird unten auf dieser Seite („Download PDF Version“) und im Hero der Startseite verlinkt. Ohne PDF werden die Buttons ausgeblendet.',
+      type: 'file',
+      options: {accept: 'application/pdf'},
+    }),
+  ],
+  preview: {
+    select: {id: '_id'},
+    prepare: ({id}) => ({title: String(id).includes('design') ? 'Design – Seite' : 'Illustration – Seite'}),
+  },
+})
+
+/* ---------------- About & Contact ---------------- */
+
 export const about = defineType({
   name: 'about',
   title: 'About & Contact',
   type: 'document',
   fields: [
-    imageWithAlt('portrait', 'Porträt', 'Hochformat (ca. 2:3).'),
-    defineField({name: 'greeting', title: 'Begrüssung', type: 'string', initialValue: 'Hello!'}),
+    imageField('portrait', 'Porträt', 'Rechts neben dem Text, auf dem Handy oben. Hochformat (ca. 2:3).'),
+    defineField({
+      name: 'greeting',
+      title: 'Begrüssung',
+      description: 'Grosse orange Zeile, z. B. „Hello!“.',
+      type: 'string',
+      initialValue: 'Hello!',
+    }),
     defineField({
       name: 'lead',
-      title: 'Einleitung (gross)',
+      title: 'Einleitung',
+      description: 'Grosser Text direkt unter der Begrüssung.',
       type: 'text',
       rows: 3,
     }),
-    richText('body', 'Text'),
-    imageWithAlt('contactIllustration', 'Illustration beim Kontaktformular', 'Quadratisch.'),
+    richText('body', 'Text', 'Normaler Fliesstext darunter. Absätze mit Enter trennen.'),
+    imageField(
+      'contactIllustration',
+      'Illustration beim Kontaktformular',
+      'Links neben „Get in touch“. Quadratisch.',
+    ),
   ],
   preview: {prepare: () => ({title: 'About & Contact'})},
 })
+
+/* ---------------- Impressum ---------------- */
 
 export const legal = defineType({
   name: 'legal',
@@ -93,36 +161,75 @@ export const legal = defineType({
   type: 'document',
   fields: [
     defineField({name: 'name', title: 'Name', type: 'string'}),
-    defineField({name: 'address', title: 'Adresse', type: 'text', rows: 3}),
-    richText('body', 'Weitere Angaben'),
+    defineField({
+      name: 'address',
+      title: 'Adresse',
+      description: 'Jede Zeile einzeln (Strasse, PLZ Ort, Land).',
+      type: 'text',
+      rows: 3,
+    }),
+    richText(
+      'body',
+      'Weitere Abschnitte',
+      'Z. B. Copyright, Haftungsausschluss. Abschnittstitel als „Zwischentitel“ formatieren.',
+    ),
   ],
   preview: {prepare: () => ({title: 'Impressum'})},
 })
 
-export const settings = defineType({
-  name: 'settings',
-  title: 'Allgemein',
+/* ---------------- Auf allen Seiten ---------------- */
+
+export const ctaBlock = defineType({
+  name: 'ctaBlock',
+  title: 'Kontakt-Block',
   type: 'document',
-  groups: [
-    {name: 'contact', title: 'Kontakt', default: true},
-    {name: 'portfolio', title: 'Portfolio-Seiten'},
-    {name: 'cta', title: 'Kontakt-Block'},
-  ],
+  description: 'Gelber Block unten auf Startseite, Übersichten und Projektseiten.',
   fields: [
-    defineField({name: 'email', title: 'E-Mail', type: 'string', group: 'contact', validation: (rule) => rule.email()}),
-    defineField({name: 'instagram', title: 'Instagram-Name (ohne @)', type: 'string', group: 'contact'}),
-    defineField({name: 'illustrationPdf', title: 'PDF Illustration-Portfolio', type: 'file', options: {accept: 'application/pdf'}, group: 'portfolio'}),
-    defineField({name: 'designPdf', title: 'PDF Design-Portfolio', type: 'file', options: {accept: 'application/pdf'}, group: 'portfolio'}),
-    {...imageWithAlt('illustrationHeader', 'Header-Bild Illustration', 'Breites Format (ca. 4:1).'), group: 'portfolio'},
-    {...imageWithAlt('designHeader', 'Header-Bild Design', 'Breites Format (ca. 4:1).'), group: 'portfolio'},
-    {...imageWithAlt('ctaIllustration', 'Illustration im Kontakt-Block', 'Quadratisch. Erscheint unten auf Start-, Übersichts- und Projektseiten.'), group: 'cta'},
+    imageField('illustration', 'Illustration', 'Links im gelben Block. Quadratisch.'),
     defineField({
-      name: 'ctaTitle',
+      name: 'title',
       title: 'Titel',
       type: 'string',
-      group: 'cta',
       initialValue: 'You have questions, want to work with me or just have a chat?',
     }),
   ],
-  preview: {prepare: () => ({title: 'Allgemein'})},
+  preview: {prepare: () => ({title: 'Kontakt-Block'})},
+})
+
+export const settings = defineType({
+  name: 'settings',
+  title: 'Footer & Kontaktdaten',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'footerSubtitle',
+      title: 'Untertitel im Footer',
+      description: 'Steht unter „Kendra Schlegel“.',
+      type: 'string',
+      initialValue: 'Illustration and Graphic Design',
+    }),
+    defineField({
+      name: 'email',
+      title: 'E-Mail',
+      description: 'Im Footer und im Impressum.',
+      type: 'string',
+      validation: (rule) => rule.email(),
+    }),
+    defineField({
+      name: 'instagram',
+      title: 'Instagram-Name (ohne @)',
+      description: 'Wird im Kontakt-Block verlinkt.',
+      type: 'string',
+    }),
+
+    // Ältere Felder – inzwischen unter „Illustration/Design → Seite“ und „Kontakt-Block“.
+    // Ausgeblendet, damit bereits eingetragene Inhalte erhalten bleiben.
+    defineField({name: 'illustrationPdf', type: 'file', hidden: true}),
+    defineField({name: 'designPdf', type: 'file', hidden: true}),
+    defineField({name: 'illustrationHeader', type: 'image', hidden: true}),
+    defineField({name: 'designHeader', type: 'image', hidden: true}),
+    defineField({name: 'ctaIllustration', type: 'image', hidden: true}),
+    defineField({name: 'ctaTitle', type: 'string', hidden: true}),
+  ],
+  preview: {prepare: () => ({title: 'Footer & Kontaktdaten'})},
 })

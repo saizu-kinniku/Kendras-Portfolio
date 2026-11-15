@@ -36,7 +36,7 @@ const builder = client ? createImageUrlBuilder(client) : null;
 interface SanityImageField {
   asset?: { _ref: string };
   hotspot?: { x: number; y: number };
-  crop?: unknown;
+  crop?: { top: number; bottom: number; left: number; right: number };
   alt?: string;
 }
 
@@ -46,14 +46,23 @@ function toImage(field: SanityImageField | null | undefined, fallbackAlt = ''): 
   if (!builder || !field?.asset?._ref) return undefined;
   // _ref-Format: image-<id>-<breite>x<höhe>-<format>
   const match = field.asset._ref.match(/-(\d+)x(\d+)-/);
-  const width = match ? Number(match[1]) : 1600;
-  const height = match ? Number(match[2]) : 1000;
-  const widths = WIDTHS.filter((w) => w <= width);
-  if (!widths.length || widths[widths.length - 1] < width) widths.push(Math.min(width, 2560));
+  const crop = field.crop ?? { top: 0, bottom: 0, left: 0, right: 0 };
+  const cropW = 1 - crop.left - crop.right || 1;
+  const cropH = 1 - crop.top - crop.bottom || 1;
+  // Masse nach einem eventuellen Zuschnitt in Sanity
+  const width = Math.round((match ? Number(match[1]) : 1600) * cropW);
+  const height = Math.round((match ? Number(match[2]) : 1000) * cropH);
+  const maxW = Math.min(width, WIDTHS[WIDTHS.length - 1]);
+  const widths = WIDTHS.filter((w) => w < maxW);
+  widths.push(maxW);
   const url = (w: number) => builder.image(field).width(w).auto('format').quality(85).url();
-  const pos = field.hotspot ? `${(field.hotspot.x * 100).toFixed(1)}% ${(field.hotspot.y * 100).toFixed(1)}%` : '50% 50%';
+  // Fokuspunkt relativ zum zugeschnittenen Bild
+  const clamp = (v: number) => Math.min(100, Math.max(0, v * 100));
+  const pos = field.hotspot
+    ? `${clamp((field.hotspot.x - crop.left) / cropW).toFixed(1)}% ${clamp((field.hotspot.y - crop.top) / cropH).toFixed(1)}%`
+    : '50% 50%';
   return {
-    src: url(Math.min(width, 1600)),
+    src: url(Math.min(maxW, 1600)),
     srcset: widths.map((w) => `${url(w)} ${w}w`).join(', '),
     alt: field.alt || fallbackAlt,
     width,
@@ -121,23 +130,31 @@ export const getProjectsByCategory = async (category: Category) =>
 export const getSettings = memo(async (): Promise<Settings> => {
   const d = placeholderSettings;
   if (!client) return d;
-  const s = await client.fetch(
-    `*[_id == "settings"][0]{ email, instagram, ctaTitle, ctaIllustration, illustrationHeader, designHeader,
-      "illustrationPdf": illustrationPdf.asset->url, "designPdf": designPdf.asset->url }`,
-  );
+  // „Footer & Kontaktdaten“, „Illustration/Design → Seite“ und „Kontakt-Block“.
+  // Ältere Felder aus „settings“ dienen als Rückfall, damit früher eingetragene Inhalte erhalten bleiben.
+  const r = await client.fetch(`{
+    "s": *[_id == "settings"][0]{ email, instagram, footerSubtitle, ctaTitle, ctaIllustration,
+      illustrationHeader, designHeader,
+      "illustrationPdf": illustrationPdf.asset->url, "designPdf": designPdf.asset->url },
+    "ill": *[_id == "illustrationPage"][0]{ headerImage, "pdf": pdf.asset->url },
+    "des": *[_id == "designPage"][0]{ headerImage, "pdf": pdf.asset->url },
+    "cta": *[_id == "cta"][0]{ title, illustration }
+  }`);
+  const { s, ill, des, cta } = r ?? {};
   return {
     email: s?.email || d.email,
     instagram: s?.instagram || d.instagram,
+    footerSubtitle: s?.footerSubtitle || d.footerSubtitle,
     pdfs: {
-      illustration: s?.illustrationPdf || d.pdfs.illustration,
-      design: s?.designPdf || d.pdfs.design,
+      illustration: ill?.pdf || s?.illustrationPdf || undefined,
+      design: des?.pdf || s?.designPdf || undefined,
     },
     headers: {
-      illustration: toImage(s?.illustrationHeader),
-      design: toImage(s?.designHeader),
+      illustration: toImage(ill?.headerImage ?? s?.illustrationHeader),
+      design: toImage(des?.headerImage ?? s?.designHeader),
     },
-    ctaIllustration: toImage(s?.ctaIllustration),
-    ctaTitle: s?.ctaTitle || d.ctaTitle,
+    ctaIllustration: toImage(cta?.illustration ?? s?.ctaIllustration),
+    ctaTitle: cta?.title || s?.ctaTitle || d.ctaTitle,
   };
 });
 

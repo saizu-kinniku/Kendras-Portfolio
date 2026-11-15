@@ -7,10 +7,12 @@ interface Props {
   sizes: string;
   class?: string;
   loading?: 'lazy' | 'eager';
+  /** Für das wichtigste Bild der Seite (Hero): "high" */
+  priority?: boolean;
   alt?: string;
 }
 
-const { image, sizes, class: className, loading = 'lazy', alt } = Astro.props;
+const { image, sizes, class: className, loading = 'lazy', priority = false, alt } = Astro.props;
 ---
 
 <img
@@ -21,7 +23,8 @@ const { image, sizes, class: className, loading = 'lazy', alt } = Astro.props;
   width={image.width}
   height={image.height}
   alt={alt ?? image.alt}
-  loading={loading}
+  loading={priority ? 'eager' : loading}
+  fetchpriority={priority ? 'high' : undefined}
   decoding="async"
   style={`object-position: ${image.position}`}
 />

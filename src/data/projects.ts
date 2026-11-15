@@ -28,7 +28,9 @@ export interface Project {
 export interface Settings {
   email: string;
   instagram: string;
-  pdfs: Record<Category, string>;
+  footerSubtitle: string;
+  /** PDF-URLs; fehlt eins, werden die Buttons ausgeblendet */
+  pdfs: Partial<Record<Category, string>>;
   headers: Partial<Record<Category, SiteImage>>;
   ctaIllustration?: SiteImage;
   ctaTitle: string;
@@ -92,7 +94,8 @@ export const placeholderProjects: Project[] = [
 export const placeholderSettings: Settings = {
   email: 'kendraschlegelart@gmail.com',
   instagram: 'kendraschlegel',
-  pdfs: { illustration: '#', design: '#' },
+  footerSubtitle: 'Illustration and Graphic Design',
+  pdfs: {},
   headers: {},
   ctaTitle: 'You have questions, want to work with me or just have a chat?',
 };

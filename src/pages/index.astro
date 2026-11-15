@@ -12,28 +12,42 @@ const home = await getHome();
 const settings = await getSettings();
 ---
 
-<Base>
+<Base image={home.hero}>
   <section class="hero">
     <div class="hero-media">
-      {home.hero && <Img image={home.hero} sizes="100vw" loading="eager" />}
+      {home.hero && <Img image={home.hero} sizes="100vw" priority />}
     </div>
     <div class="hero-content">
       <p class="t-body intro">{home.intro}</p>
-      <div class="hero-buttons">
-        <Button href={settings.pdfs.illustration}>Illustration portfolio PDF</Button>
-        <Button href={settings.pdfs.design}>Design portfolio PDF</Button>
-      </div>
+      {
+        (settings.pdfs.illustration || settings.pdfs.design) && (
+          <div class="hero-buttons">
+            {settings.pdfs.illustration && (
+              <Button href={settings.pdfs.illustration} newTab>
+                Illustration portfolio PDF
+              </Button>
+            )}
+            {settings.pdfs.design && (
+              <Button href={settings.pdfs.design} newTab>
+                Design portfolio PDF
+              </Button>
+            )}
+          </div>
+        )
+      }
     </div>
   </section>
 
-  <section class="selected">
-    <h1 class="t-headline">Selected works</h1>
-    {
-      home.selected.map((p) => (
-        <ProjectCard size="big" href={projectUrl(p)} title={p.title} tags={p.tags} image={p.cover} />
-      ))
-    }
-  </section>
+  {
+    home.selected.length > 0 && (
+      <section class="selected">
+        <h1 class="t-headline">Selected works</h1>
+        {home.selected.map((p) => (
+          <ProjectCard size="big" href={projectUrl(p)} title={p.title} tags={p.tags} image={p.cover} />
+        ))}
+      </section>
+    )
+  }
 
   <section class="discover">
     <Button href={categoryUrl('illustration')}>discover my illustration work</Button>
@@ -48,7 +62,9 @@ const settings = await getSettings();
     position: relative;
     display: flex;
     flex-direction: column;
-    aspect-ratio: 1280 / 720;
+    /* Navigation + Hero = volle Bildschirmhöhe */
+    height: calc(100svh - var(--nav-h));
+    min-height: 420px;
     padding: 40px 60px;
   }
 
@@ -59,7 +75,7 @@ const settings = await getSettings();
     background: var(--c-placeholder);
   }
 
-  .hero-media img {
+  .hero-media :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -133,14 +149,19 @@ const settings = await getSettings();
 
   /* Mobile: Bild hochformatig oben, Text und Buttons darunter */
   @media (max-width: 700px) {
+    /* Bild füllt den Platz über Text und Buttons, zusammen eine Bildschirmhöhe */
     .hero {
-      aspect-ratio: auto;
-      padding: 0;
+      padding: 0 0 var(--space-s);
     }
 
     .hero-media {
-      position: static;
-      aspect-ratio: 4 / 5;
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 200px;
+    }
+
+    .hero-content {
+      flex: none;
     }
 
     .hero-content {

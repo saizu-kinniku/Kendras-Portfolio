@@ -4,14 +4,14 @@ import Button from './Button.astro';
 import NavLink from './NavLink.astro';
 import { getSettings } from '../lib/content';
 
-const { email } = await getSettings();
+const { email, footerSubtitle } = await getSettings();
 ---
 
 <footer class="footer">
   <div class="left">
     <div class="brand">
       <p class="t-name name">Kendra Schlegel</p>
-      <p class="subtitle">Illustration and Graphic Design</p>
+      <p class="subtitle">{footerSubtitle}</p>
     </div>
     <a class="t-body mail" href={`mailto:${email}`}>{email}</a>
     <Button href="#top">Back to top</Button>
@@ -28,10 +28,10 @@ const { email } = await getSettings();
 <style>
   .footer {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 100px 90px;
+    /* Spalten schrumpfen statt umzubrechen; ab ~1566px exakt wie Figma (2 × 693 + 90) */
+    gap: clamp(40px, 5.75vw, 90px);
     padding: var(--page-pad);
     background: var(--c-offblack);
     color: var(--c-white);
@@ -39,8 +39,8 @@ const { email } = await getSettings();
 
   .left,
   .right {
-    width: 693px;
-    max-width: 100%;
+    flex: 0 1 693px;
+    min-width: 0;
     padding: 20px 0;
   }
 
@@ -80,14 +80,7 @@ const { email } = await getSettings();
   /* Tablet: beide Spalten nebeneinander statt umbrechen */
   @media (max-width: 1100px) {
     .footer {
-      flex-wrap: nowrap;
       justify-content: space-between;
-      gap: var(--space-m);
-    }
-
-    .left,
-    .right {
-      width: auto;
     }
 
     .left {

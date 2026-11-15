@@ -2,20 +2,30 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import type { SiteImage } from '../data/projects';
 
 interface Props {
   title?: string;
   description?: string;
+  /** Vorschaubild beim Teilen (WhatsApp, Instagram, LinkedIn …) */
+  image?: SiteImage;
   active?: 'illustration' | 'design' | 'about';
+  noindex?: boolean;
 }
 
 const {
   title,
-  description = 'Kendra Schlegel – illustrator and graphic designer based in Switzerland.',
+  description: rawDescription,
+  image,
   active,
+  noindex = false,
 } = Astro.props;
 
+const fallbackDescription = 'Kendra Schlegel – illustrator and graphic designer based in Switzerland.';
+const description = (rawDescription?.trim() || fallbackDescription).replace(/\s+/g, ' ').slice(0, 160);
 const fullTitle = title ? `${title} – Kendra Schlegel` : 'Kendra Schlegel – Illustration and Graphic Design';
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const ogImage = image ? image.src.replace(/w=\d+/, 'w=1200') : undefined;
 ---
 
 <!doctype html>
@@ -25,6 +35,18 @@ const fullTitle = title ? `${title} – Kendra Schlegel` : 'Kendra Schlegel – 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kendra Schlegel" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {image?.alt && <meta property="og:image:alt" content={image.alt} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
   </head>
   <body id="top">
     <Nav active={active} />

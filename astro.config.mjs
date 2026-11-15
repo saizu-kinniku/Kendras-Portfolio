@@ -1,7 +1,13 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  // TODO: echte Domain eintragen, sobald sie registriert ist
-  site: process.env.URL || 'https://example.com', // Netlify setzt URL automatisch
+  // Netlify setzt URL automatisch auf die Hauptadresse (später die eigene Domain)
+  site: process.env.URL || 'https://kendrasportfolio.netlify.app',
+  integrations: [
+    sitemap({
+      filter: (page) => !/\/(thanks|404)\/?$/.test(page),
+    }),
+  ],
 });

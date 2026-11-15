@@ -15,7 +15,8 @@ const settings = await getSettings();
     <h2 class="t-name">{settings.ctaTitle}</h2>
     <p class="t-body text">
       Feel free to contact me via DM on Instagram{' '}
-      <a href={`https://instagram.com/${settings.instagram}`}>@{settings.instagram}</a> or write to me directly
+      <a href={`https://instagram.com/${settings.instagram}`} target="_blank" rel="noopener">@{settings.instagram}</a> or write
+      to me directly
     </p>
     <Button href="/about/#contact">Contact</Button>
   </div>
@@ -24,18 +25,17 @@ const settings = await getSettings();
 <style>
   .cta {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 100px;
+    /* Spalten schrumpfen statt umzubrechen; ab ~1566px exakt wie Figma */
+    gap: clamp(32px, 6.39vw, 100px);
     padding: 60px var(--page-pad);
     background: var(--c-butter);
   }
 
   .illu {
-    flex-shrink: 0;
-    width: 515px;
-    height: 514px;
+    flex: 0 1 515px;
+    aspect-ratio: 515 / 514;
     overflow: hidden;
     background: var(--c-white);
   }
@@ -50,9 +50,9 @@ const settings = await getSettings();
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    flex: 0 1 693px;
+    min-width: 0;
     gap: 73px;
-    width: 693px;
-    max-width: 100%;
     color: var(--c-black);
   }
 
@@ -63,20 +63,15 @@ const settings = await getSettings();
 
   @media (max-width: 1100px) {
     .cta {
-      flex-wrap: nowrap;
-      gap: var(--space-m);
       padding: var(--space-l) var(--page-pad);
     }
 
     .illu {
-      width: min(515px, 40%);
-      height: auto;
-      aspect-ratio: 515 / 514;
+      flex-basis: 40%;
     }
 
     .content {
       flex: 1 1 0;
-      min-width: 0;
       gap: var(--space-s);
     }
   }
@@ -87,10 +82,10 @@ const settings = await getSettings();
       align-items: stretch;
     }
 
-    .illu {
+    .illu,
+    .content {
+      flex: none;
       width: 100%;
-      height: auto;
-      aspect-ratio: 515 / 514;
     }
   }
 </style>

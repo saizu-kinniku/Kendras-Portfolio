@@ -1,14 +1,66 @@
 import {defineConfig} from 'sanity'
-import {structureTool} from 'sanity/structure'
-import {visionTool} from '@sanity/vision'
+import {structureTool, type StructureBuilder, type StructureResolverContext} from 'sanity/structure'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
-import {schemaTypes, singletons} from './schemaTypes'
+// Icons einzeln importieren (@sanity/icons v5)
+import {BlockquoteIcon} from '@sanity/icons/Blockquote'
+import {CaseIcon} from '@sanity/icons/Case'
+import {DocumentIcon} from '@sanity/icons/Document'
+import {EarthGlobeIcon} from '@sanity/icons/EarthGlobe'
+import {HomeIcon} from '@sanity/icons/Home'
+import {ImagesIcon} from '@sanity/icons/Images'
+import {InfoOutlineIcon} from '@sanity/icons/InfoOutline'
+import {PresentationIcon} from '@sanity/icons/Presentation'
+import {UserIcon} from '@sanity/icons/User'
+import {schemaTypes, singletonTypes} from './schemaTypes'
 
-// Projekt-ID aus sanity.io/manage – wird beim Build über die Umgebungsvariable gesetzt
+// Projekt-ID aus sanity.io/manage – per Umgebungsvariable überschreibbar
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID || 'kkd7bqq0'
 const dataset = process.env.SANITY_STUDIO_DATASET || 'production'
 
-const singletonTypes = new Set<string>(singletons.map((s) => s.type))
+/** Einzelseite mit fester ID */
+const singleton = (S: StructureBuilder, id: string, type: string, title: string, icon?: any) =>
+  S.listItem()
+    .title(title)
+    .id(id)
+    .icon(icon)
+    .child(S.document().schemaType(type).documentId(id).title(title))
+
+/** Bereich Illustration / Design: Seite + sortierbare Projektliste */
+const categorySection = (
+  S: StructureBuilder,
+  context: StructureResolverContext,
+  category: 'illustration' | 'design',
+  title: string,
+  icon: any,
+) =>
+  S.listItem()
+    .title(title)
+    .id(category)
+    .icon(icon)
+    .child(
+      S.list()
+        .title(title)
+        .items([
+          singleton(S, `${category}Page`, 'categoryPage', 'Seite (Header-Bild & PDF)', DocumentIcon),
+          orderableDocumentListDeskItem({
+            type: 'project',
+            id: `projects-${category}`,
+            title: 'Projekte',
+            icon: CaseIcon,
+            filter: 'category == $category',
+            params: {category},
+            createIntent: false,
+            menuItems: [
+              S.menuItem()
+                .title('Neues Projekt')
+                .intent({type: 'create', params: {type: 'project', template: `project-${category}`}})
+                .serialize(),
+            ],
+            S,
+            context,
+          }),
+        ]),
+    )
 
 export default defineConfig({
   name: 'default',
@@ -19,44 +71,43 @@ export default defineConfig({
 
   plugins: [
     structureTool({
+      title: 'Inhalte',
+      // Aufbau wie die Website: Seiten in der Reihenfolge der Navigation, darunter was auf allen Seiten erscheint
       structure: (S, context) =>
         S.list()
-          .title('Inhalte')
+          .title('Website')
           .items([
-            orderableDocumentListDeskItem({
-              type: 'project',
-              title: 'Illustration',
-              id: 'projects-illustration',
-              filter: 'category == $category',
-              params: {category: 'illustration'},
-              S,
-              context,
-            }),
-            orderableDocumentListDeskItem({
-              type: 'project',
-              title: 'Design',
-              id: 'projects-design',
-              filter: 'category == $category',
-              params: {category: 'design'},
-              S,
-              context,
-            }),
+            singleton(S, 'home', 'home', 'Startseite', HomeIcon),
+            categorySection(S, context, 'illustration', 'Illustration', ImagesIcon),
+            categorySection(S, context, 'design', 'Design', PresentationIcon),
+            singleton(S, 'about', 'about', 'About & Contact', UserIcon),
+            singleton(S, 'legal', 'legal', 'Impressum (Legal Notice)', InfoOutlineIcon),
             S.divider(),
-            ...singletons.map((s) =>
-              S.listItem()
-                .title(s.title)
-                .id(s.id)
-                .child(S.document().schemaType(s.type).documentId(s.id).title(s.title)),
-            ),
+            S.listItem()
+              .title('Auf allen Seiten')
+              .id('global')
+              .icon(EarthGlobeIcon)
+              .child(
+                S.list()
+                  .title('Auf allen Seiten')
+                  .items([
+                    singleton(S, 'cta', 'ctaBlock', 'Kontakt-Block (gelb, unten)', BlockquoteIcon),
+                    singleton(S, 'settings', 'settings', 'Footer & Kontaktdaten', InfoOutlineIcon),
+                  ]),
+              ),
           ]),
     }),
-    visionTool(),
   ],
 
   schema: {
     types: schemaTypes,
-    // Einzelseiten nicht über „Neues Dokument“ anlegbar
-    templates: (templates) => templates.filter(({schemaType}) => !singletonTypes.has(schemaType)),
+    templates: (templates) => [
+      // Einzelseiten nicht über „Neues Dokument“ anlegbar
+      ...templates.filter(({schemaType}) => !singletonTypes.has(schemaType) && schemaType !== 'project'),
+      // Neues Projekt: Bereich ist schon gesetzt
+      {id: 'project-illustration', title: 'Projekt (Illustration)', schemaType: 'project', value: {category: 'illustration'}},
+      {id: 'project-design', title: 'Projekt (Design)', schemaType: 'project', value: {category: 'design'}},
+    ],
   },
 
   document: {

@@ -8,7 +8,7 @@ import { getAbout } from '../lib/content';
 const about = await getAbout();
 ---
 
-<Base title="About & Contact" active="about">
+<Base title="About & Contact" active="about" description={about.lead} image={about.portrait}>
   <section class="about">
     <div class="text-col">
       <div class="text">
@@ -28,7 +28,7 @@ const about = await getAbout();
     </div>
     <div class="form-col">
       <h2 class="t-name">Get in touch</h2>
-      <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="form">
+      <form name="contact" method="POST" action="/thanks/" data-netlify="true" netlify-honeypot="bot-field" class="form">
         <input type="hidden" name="form-name" value="contact" />
         <p class="visually-hidden">
           <label>Don’t fill this out: <input name="bot-field" /></label>
@@ -60,7 +60,8 @@ const about = await getAbout();
     align-items: center;
     justify-content: flex-end;
     gap: 60px;
-    padding: 40px 0 0 var(--page-pad);
+    /* Porträt schliesst direkt an die Navigation an (in Figma 40px Abstand) */
+    padding: 0 0 0 var(--page-pad);
   }
 
   .text-col {
@@ -116,6 +117,7 @@ const about = await getAbout();
 
   .portrait {
     flex-shrink: 0;
+    align-self: flex-start;
     width: min(644px, 45%);
     aspect-ratio: 644 / 928;
     background: var(--c-placeholder);
@@ -136,27 +138,25 @@ const about = await getAbout();
   /* ---------- Contact ---------- */
   .contact {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 100px;
+    gap: clamp(32px, 6.39vw, 100px);
     padding: 80px var(--page-pad) 40px;
     background: var(--c-butter);
   }
 
   .illu {
-    flex-shrink: 0;
-    width: 515px;
-    height: 514px;
+    flex: 0 1 515px;
+    aspect-ratio: 515 / 514;
     background: var(--c-white);
   }
 
   .form-col {
     display: flex;
     flex-direction: column;
+    flex: 0 1 693px;
+    min-width: 0;
     gap: 40px;
-    width: 693px;
-    max-width: 100%;
     color: var(--c-black);
   }
 
@@ -171,8 +171,8 @@ const about = await getAbout();
     display: flex;
     flex-direction: column;
     gap: 20px;
-    width: 690px;
-    max-width: 100%;
+    width: 100%;
+    max-width: 690px;
   }
 
   .field input,
@@ -225,24 +225,15 @@ const about = await getAbout();
     }
 
     .contact {
-      flex-wrap: nowrap;
-      gap: var(--space-m);
       padding: var(--space-l) var(--page-pad);
     }
 
     .illu {
-      width: min(515px, 40%);
-      height: auto;
-      aspect-ratio: 515 / 514;
+      flex-basis: 40%;
     }
 
     .form-col {
       flex: 1 1 0;
-      min-width: 0;
-    }
-
-    .fields {
-      width: 100%;
     }
 
     .form-col,
@@ -275,10 +266,10 @@ const about = await getAbout();
       align-items: stretch;
     }
 
-    .illu {
+    .illu,
+    .form-col {
+      flex: none;
       width: 100%;
-      height: auto;
-      aspect-ratio: 515 / 514;
     }
 
     .field input {
