@@ -7,9 +7,13 @@ import Img from '../../components/Img.astro';
 import { categoryLabels, categoryUrl, type Project } from '../../data/projects';
 import { getProjects } from '../../lib/content';
 
+// URL: /illustration/<projekt>/ bzw. /design/<projekt>/
 export async function getStaticPaths() {
   const projects = await getProjects();
-  return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+  return projects.map((project) => ({
+    params: { category: project.category, slug: project.slug },
+    props: { project },
+  }));
 }
 
 interface Props {
@@ -29,12 +33,12 @@ const other = project.category === 'illustration' ? 'design' : 'illustration';
 
     <div class="gallery">
       {
-        project.images.map((image, i) =>
-          image ? (
+        project.images.length ? (
+          project.images.map((image, i) => (
             <Img image={image} sizes="(max-width: 1360px) 100vw, 1280px" loading={i === 0 ? 'eager' : 'lazy'} />
-          ) : (
-            <div class="placeholder" aria-hidden="true" />
-          ),
+          ))
+        ) : (
+          <div class="placeholder" aria-hidden="true" />
         )
       }
     </div>

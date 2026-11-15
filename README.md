@@ -1,104 +1,83 @@
 # Kendra Schlegel – Portfolio
 
-Astro-Website + Sanity Studio (unter `/studio`), gehostet auf Netlify.
+Astro-Website, Inhalte als Dateien im Repo, bearbeitet mit **Pages CMS**, gehostet auf **Cloudflare Pages**.
 
 ```
-/            Astro-Website (statisch)
-/studio      Sanity Studio – Kendra pflegt hier alle Inhalte
+src/content/pages/*.json        Startseite, Übersichtsseiten, About, Impressum, Kontakt-Block, Footer
+src/content/illustration/*.md   Projekte Illustration
+src/content/design/*.md         Projekte Design
+src/assets/uploads/             hochgeladene Bilder (werden beim Build optimiert, WebP + srcset)
+public/files/                   hochgeladene PDFs
+.pages.yml                      Konfiguration von Pages CMS
 ```
+
+## Inhalte bearbeiten (Kendra)
+
+1. https://app.pagescms.org öffnen, mit GitHub anmelden
+2. Repository **Kendras-Portfolio** wählen
+3. Bearbeiten und **Save** – die Website ist nach ca. 1–2 Minuten aktualisiert
+
+Aufbau im CMS (wie die Website):
+
+```
+Startseite                 Hero-Bild, Bildausschnitt, Introtext
+Illustration
+  ├ Seite                  Header-Bild, PDF-Portfolio
+  └ Projekte               Titel, Titelbild, Schlagworte, „Auf der Startseite zeigen“, Reihenfolge, Beschreibung, Bilder
+Design
+  ├ Seite
+  └ Projekte
+About & Contact            Porträt, Begrüssung, Einleitung, Text, Illustration beim Formular
+Impressum (Legal Notice)   Name, Adresse, weitere Abschnitte
+Auf allen Seiten
+  ├ Kontakt-Block          Illustration, Titel
+  └ Footer & Kontaktdaten  Untertitel, E-Mail, Instagram
+```
+
+**Bilder vor dem Hochladen verkleinern:** ca. 3000 px lange Kante, 1–2 MB. Die Website erzeugt daraus selbst alle nötigen Grössen; zu grosse Originale machen nur das Repository schwer.
+
+## Kontaktformular
+
+Kein Server: „Send“ öffnet das Mailprogramm der Besucherin mit Empfängerin (E-Mail aus „Footer & Kontaktdaten“), Betreff und Nachricht. Darunter steht die Adresse zum Kopieren, falls sich kein Mailprogramm öffnet.
 
 ## Lokal entwickeln
 
 ```bash
 npm install
-npm run dev                   # Website: http://localhost:4321
-
-# Studio lokal
-npm --prefix studio install
-npm run studio                # http://localhost:3333/studio
+npm run dev      # http://localhost:4321
+npm run build    # statischer Build nach dist/
 ```
 
-Sanity-Projekt: `kkd7bqq0`, Dataset `production` (fest eingetragen, per Umgebungsvariable überschreibbar).
-Mit `SANITY_PROJECT_ID="" npm run dev` läuft die Website ohne Sanity, nur mit Platzhaltern.
+## Einrichtung Cloudflare Pages (einmalig)
 
-## Inhalte (Sanity)
+1. Cloudflare-Konto anlegen → **Workers & Pages → Create → Pages → Connect to Git**
+2. GitHub verbinden, Repository **Kendras-Portfolio** wählen
+3. Build-Einstellungen:
+   - Framework preset: **Astro**
+   - Build command: `npm run build`
+   - Build output directory: `dist`
+4. **Save and Deploy**
+5. Später mit eigener Domain: unter **Settings → Variables** `SITE_URL=https://<domain>` setzen (für Sitemap und Link-Vorschauen)
 
-Das Studio ist aufgebaut wie die Website – Seiten in der Reihenfolge der Navigation, Felder in der Reihenfolge, in der sie auf der Seite erscheinen:
-
-```
-Startseite                 Hero-Bild, Introtext, Selected works
-Illustration
-  ├ Seite                  Header-Bild, PDF-Portfolio
-  └ Projekte               sortierbar per Drag & Drop
-Design
-  ├ Seite                  Header-Bild, PDF-Portfolio
-  └ Projekte
-About & Contact            Porträt, Begrüssung, Einleitung, Text, Illustration beim Formular
-Impressum (Legal Notice)   Name, Adresse, weitere Abschnitte
-──────────
-──────────
-Website aktualisieren      ein Button: alles veröffentlichen + 1 Deploy
-──────────
-Auf allen Seiten
-  ├ Kontakt-Block          gelber Block unten: Illustration, Titel
-  └ Footer & Kontaktdaten  Untertitel, E-Mail, Instagram
-```
-
-**Arbeitsweise:** Inhalte bearbeiten (Entwürfe bleiben gespeichert) → „Website aktualisieren“ → Button „Alles veröffentlichen & Website aktualisieren“. Das veröffentlicht alle Entwürfe auf einmal und löst genau **einen** Netlify-Build aus (spart Netlify-Credits).
-
-- Projekte haben zwei Reiter: **Projektkarte** (Titel, Titelbild, Schlagworte) und **Projektseite** (Beschreibung, Bilder, Adresse).
-- „Neues Projekt“ in einer Projektliste setzt den Bereich automatisch.
-- Bilder: Fokuspunkt (Hotspot) setzen – danach richtet sich der Ausschnitt auf Desktop und Mobile.
-- Leere Felder fallen auf Platzhalter zurück; fehlt ein PDF, werden die PDF-Buttons ausgeblendet.
-
-## Einmalige Einrichtung
-
-### 1. Sanity (sanity.io/manage → Projekt)
-1. Project ID: `kkd7bqq0` · Dataset: `production` (muss existieren).
-2. **API → CORS origins** → hinzufügen, jeweils mit „Allow credentials“:
-   - `http://localhost:3333`
-   - `https://<netlify-name>.netlify.app`
-   - `https://<eigene-domain>` (sobald verbunden)
-
-### 2. GitHub
-Repository mit diesem Code (Kendra ist Owner, Luis Collaborator).
-
-### 3. Netlify (Kendras Konto)
-1. **Add new project → Import from Git** → Repository wählen. Build-Einstellungen kommen aus `netlify.toml`.
-2. Umgebungsvariablen sind nicht nötig (Projekt-ID ist im Code).
-3. **Build & deploy → Build hooks** → Hook „Sanity“ anlegen, URL kopieren.
-4. **Forms** → Formularerkennung aktivieren; unter *Form notifications* E-Mail an Kendra einrichten.
-
-### 4. Neu bauen über den Button „Website aktualisieren“
-sanity.io/manage → **API → Webhooks → Create webhook**
-- URL: Build-Hook aus Schritt 3.3
-- Dataset: `production`, Trigger: Create, Update
-- **Filter: `_type == "deployTrigger"`** – sonst baut jedes einzelne „Publish“ neu
-- HTTP-Methode: POST
-
-Nach dem Klick auf den Button ist die Website nach ca. 2 Minuten aktualisiert.
-
-### 5. Domain (Infomaniak)
-Netlify → **Domain management → Add domain** → DNS-Einträge bei Infomaniak setzen, wie Netlify sie anzeigt. Die Mail-Einträge (MX) bei Infomaniak bleiben unverändert.
+Node-Version kommt aus `.node-version`.
 
 ## Struktur
 
 | Figma-Screen | Datei |
 |---|---|
 | Landing Page | `src/pages/index.astro` |
-| Portfolio Overview | `src/components/CategoryOverview.astro` (`/illustration/`, `/design/`) |
-| Project | `src/pages/projects/[slug].astro` |
+| Portfolio Overview | `src/pages/[category]/index.astro` → `src/components/CategoryOverview.astro` |
+| Project | `src/pages/[category]/[slug].astro` (URL: `/illustration/<projekt>/`) |
 | About & Contact | `src/pages/about.astro` |
-| – | `src/pages/legal-notice.astro` |
+| – | `src/pages/legal-notice.astro`, `src/pages/404.astro` |
 
-- Komponenten: `src/components/` (Nav mit Burger-Menü, Footer, CTA, Button, NavLink, ArrowLink, ProjectCard, Img)
+- Komponenten: `src/components/`
 - Design-Tokens: `src/styles/global.css` (fluid, ab ~1566px exakt Figma)
-- Sanity-Abfragen: `src/lib/content.ts`
-- Sanity-Schemas: `studio/schemaTypes/`
+- Inhalte laden + Bilder optimieren: `src/lib/content.ts`
 
 Breakpoints: Tablet ≤ 1100px · Burger-Menü ≤ 960px · Mobile ≤ 700px
 
 ## Offen vor dem Launch
 
-- Datenschutzerklärung (Kontaktformular)
+- Datenschutzerklärung
 - Favicon

@@ -1,0 +1,12 @@
+---
+import CategoryOverview from '../../components/CategoryOverview.astro';
+import { categories, type Category } from '../../data/projects';
+
+export function getStaticPaths() {
+  return categories.map((category) => ({ params: { category } }));
+}
+
+const category = Astro.params.category as Category;
+---
+
+<CategoryOverview category={category} />

@@ -1,0 +1,279 @@
+# Pages CMS – Bearbeitung der Website-Inhalte auf https://app.pagescms.org
+# Aufbau wie die Website: Seiten in der Reihenfolge der Navigation,
+# Felder in der Reihenfolge, in der sie auf der Seite erscheinen.
+
+media:
+  - name: images
+    label: Bilder
+    input: src/assets/uploads
+    output: /uploads
+    extensions: [jpg, jpeg, png, webp, avif, gif]
+  - name: files
+    label: PDFs
+    input: public/files
+    output: /files
+    extensions: [pdf]
+
+content:
+  # ---------------- Startseite ----------------
+  - name: home
+    label: Startseite
+    type: file
+    path: src/content/pages/home.json
+    format: json
+    fields:
+      - name: heroImage
+        label: Hero-Bild
+        description: Grosses Bild ganz oben, füllt den ganzen Bildschirm. Querformat, ca. 3000 px breit.
+        type: image
+        options:
+          media: images
+      - name: heroFocus
+        label: Bildausschnitt Hero
+        description: Welcher Teil sichtbar bleibt, wenn das Bild zugeschnitten wird (v. a. auf dem Handy).
+        type: select
+        default: center
+        options:
+          values:
+            - { value: center, label: Mitte }
+            - { value: top, label: Oben }
+            - { value: bottom, label: Unten }
+            - { value: left, label: Links }
+            - { value: right, label: Rechts }
+      - name: intro
+        label: Introtext
+        description: Steht unten links im Hero. Die PDF-Buttons darunter kommen aus „Illustration → Seite“ und „Design → Seite“. Welche Projekte unter „Selected works“ erscheinen, stellst du im jeweiligen Projekt ein.
+        type: text
+
+  # ---------------- Illustration ----------------
+  - name: illustration
+    label: Illustration
+    type: group
+    items:
+      - name: illustration-page
+        label: Seite (Header-Bild & PDF)
+        type: file
+        path: src/content/pages/illustration.json
+        format: json
+        fields:
+          - &headerImage
+            name: headerImage
+            label: Header-Bild
+            description: Breites Bild ganz oben auf der Übersichtsseite (ca. 4:1).
+            type: image
+            options:
+              media: images
+          - &headerFocus
+            name: headerFocus
+            label: Bildausschnitt
+            type: select
+            default: center
+            options:
+              values:
+                - { value: center, label: Mitte }
+                - { value: top, label: Oben }
+                - { value: bottom, label: Unten }
+          - &pdf
+            name: pdf
+            label: PDF-Portfolio
+            description: Wird unten auf der Übersichtsseite und im Hero der Startseite verlinkt. Ohne PDF werden die Buttons ausgeblendet.
+            type: file
+            options:
+              media: files
+
+      - name: illustration-projects
+        label: Projekte
+        type: collection
+        path: src/content/illustration
+        format: yaml-frontmatter
+        filename: "{primary}.md"
+        view:
+          primary: title
+          fields: [title, order, featured]
+          sort: order
+          order: asc
+        fields: &projectFields
+          - name: title
+            label: Titel
+            description: Auf der Projektkarte und als Überschrift der Projektseite.
+            type: string
+            required: true
+          - name: cover
+            label: Titelbild
+            description: Bild auf der Projektkarte (Übersicht und Startseite).
+            type: image
+            options:
+              media: images
+          - name: coverFocus
+            label: Bildausschnitt Titelbild
+            type: select
+            default: center
+            options:
+              values:
+                - { value: center, label: Mitte }
+                - { value: top, label: Oben }
+                - { value: bottom, label: Unten }
+                - { value: left, label: Links }
+                - { value: right, label: Rechts }
+          - name: tags
+            label: Schlagworte
+            description: Klein unter dem Titel auf der Projektkarte, z. B. „Editorial“.
+            type: string
+            list: true
+          - name: featured
+            label: Auf der Startseite zeigen
+            description: Erscheint unter „Selected works“ auf der Startseite.
+            type: boolean
+            default: false
+          - name: order
+            label: Reihenfolge
+            description: Kleinere Zahl = weiter oben (1, 2, 3 …). Gilt für die Übersicht und die Startseite.
+            type: number
+            default: 10
+          - name: description
+            label: Beschreibung
+            description: Kurzer Text unter dem Titel auf der Projektseite.
+            type: text
+          - name: gallery
+            label: Bilder
+            description: Bilder auf der Projektseite, untereinander in voller Breite und im Originalformat. Reihenfolge per Drag & Drop.
+            type: image
+            list: true
+            options:
+              media: images
+
+  # ---------------- Design ----------------
+  - name: design
+    label: Design
+    type: group
+    items:
+      - name: design-page
+        label: Seite (Header-Bild & PDF)
+        type: file
+        path: src/content/pages/design.json
+        format: json
+        fields:
+          - *headerImage
+          - *headerFocus
+          - *pdf
+
+      - name: design-projects
+        label: Projekte
+        type: collection
+        path: src/content/design
+        format: yaml-frontmatter
+        filename: "{primary}.md"
+        view:
+          primary: title
+          fields: [title, order, featured]
+          sort: order
+          order: asc
+        fields: *projectFields
+
+  # ---------------- About & Contact ----------------
+  - name: about
+    label: About & Contact
+    type: file
+    path: src/content/pages/about.json
+    format: json
+    fields:
+      - name: portrait
+        label: Porträt
+        description: Rechts neben dem Text, auf dem Handy oben. Hochformat (ca. 2:3).
+        type: image
+        options:
+          media: images
+      - name: portraitFocus
+        label: Bildausschnitt Porträt
+        type: select
+        default: center
+        options:
+          values:
+            - { value: center, label: Mitte }
+            - { value: top, label: Oben }
+            - { value: bottom, label: Unten }
+      - name: greeting
+        label: Begrüssung
+        description: Grosse orange Zeile, z. B. „Hello!“.
+        type: string
+      - name: lead
+        label: Einleitung
+        description: Grosser Text direkt unter der Begrüssung.
+        type: text
+      - name: body
+        label: Text
+        description: Fliesstext darunter. Absätze mit einer Leerzeile trennen.
+        type: text
+      - name: contactIllustration
+        label: Illustration beim Kontaktformular
+        description: Links neben „Get in touch“. Quadratisch.
+        type: image
+        options:
+          media: images
+
+  # ---------------- Impressum ----------------
+  - name: legal
+    label: Impressum (Legal Notice)
+    type: file
+    path: src/content/pages/legal.json
+    format: json
+    fields:
+      - name: name
+        label: Name
+        type: string
+      - name: address
+        label: Adresse
+        description: Jede Zeile einzeln (Strasse, PLZ Ort, Land).
+        type: text
+      - name: sections
+        label: Weitere Abschnitte
+        description: Z. B. Copyright, Haftungsausschluss.
+        type: object
+        list: true
+        fields:
+          - name: title
+            label: Titel
+            type: string
+          - name: text
+            label: Text
+            type: text
+
+  # ---------------- Auf allen Seiten ----------------
+  - name: global
+    label: Auf allen Seiten
+    type: group
+    items:
+      - name: cta
+        label: Kontakt-Block (gelb, unten)
+        type: file
+        path: src/content/pages/cta.json
+        format: json
+        fields:
+          - name: illustration
+            label: Illustration
+            description: Links im gelben Block unten auf Startseite, Übersichten und Projektseiten. Quadratisch.
+            type: image
+            options:
+              media: images
+          - name: title
+            label: Titel
+            type: string
+
+      - name: settings
+        label: Footer & Kontaktdaten
+        type: file
+        path: src/content/pages/settings.json
+        format: json
+        fields:
+          - name: footerSubtitle
+            label: Untertitel im Footer
+            description: Steht unter „Kendra Schlegel“.
+            type: string
+          - name: email
+            label: E-Mail
+            description: Im Footer, im Impressum und als Empfängerin des Kontaktformulars.
+            type: string
+          - name: instagram
+            label: Instagram-Name (ohne @)
+            description: Wird im Kontakt-Block verlinkt.
+            type: string

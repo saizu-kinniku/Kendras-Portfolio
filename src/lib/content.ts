@@ -1,198 +1,197 @@
-// Inhalte aus Sanity – werden beim Build abgefragt (statische Seite).
-import { createClient } from '@sanity/client';
-import { createImageUrlBuilder } from '@sanity/image-url';
-import { toHTML } from '@portabletext/to-html';
-import {
-  placeholderAbout,
-  placeholderHome,
-  placeholderLegal,
-  placeholderProjects,
-  placeholderSettings,
-  type About,
-  type Category,
-  type Home,
-  type Legal,
-  type Project,
-  type Settings,
-  type SiteImage,
-} from '../data/projects';
+// Lädt die Inhalte aus src/content/ (bearbeitet mit Pages CMS) und optimiert die Bilder.
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import type { About, Category, Home, Legal, Project, Settings, SiteImage } from '../data/projects';
 
-// Projekt-ID ist öffentlich (steckt ohnehin im Studio). Mit SANITY_PROJECT_ID="" lässt sich lokal ohne Sanity arbeiten.
-const envProjectId = import.meta.env.SANITY_PROJECT_ID as string | undefined;
-const projectId = envProjectId === undefined ? 'kkd7bqq0' : envProjectId || undefined;
-const dataset = (import.meta.env.SANITY_DATASET as string | undefined) || 'production';
+/* ---------------- Rohdaten ---------------- */
 
-/** Ohne Projekt-ID läuft die Seite mit Platzhaltern (z. B. lokal vor dem Setup) */
-export const sanityEnabled = Boolean(projectId);
+const pageFiles = import.meta.glob<Record<string, any>>('/src/content/pages/*.json', {
+  eager: true,
+  import: 'default',
+});
+const page = (name: string): Record<string, any> => pageFiles[`/src/content/pages/${name}.json`] ?? {};
 
-const client = sanityEnabled
-  ? createClient({ projectId, dataset, apiVersion: '2026-11-01', useCdn: false, perspective: 'published' })
-  : null;
+const projectFiles = import.meta.glob<{ frontmatter: Record<string, any> }>(
+  '/src/content/{illustration,design}/*.md',
+  { eager: true },
+);
 
-const builder = client ? createImageUrlBuilder(client) : null;
+// Hochgeladene Bilder (Pages CMS speichert sie in src/assets/uploads, im Inhalt steht "/uploads/…")
+const uploads = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/uploads/**/*.{jpg,jpeg,png,webp,avif,gif,JPG,JPEG,PNG,WEBP,AVIF,GIF}',
+  { eager: true },
+);
+
+/* ---------------- Hilfsfunktionen ---------------- */
+
+const text = (v: unknown, fallback = '') => (typeof v === 'string' && v.trim() ? v.trim() : fallback);
+
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/** Absätze (durch Leerzeile getrennt) → <p>, einzelne Zeilenumbrüche → <br> */
+const paragraphs = (s: string) =>
+  s
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p>${escapeHtml(p).replace(/\n/g, '<br />')}</p>`)
+    .join('');
+
+const slugify = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+const focusPositions: Record<string, string> = {
+  center: '50% 50%',
+  top: '50% 0%',
+  bottom: '50% 100%',
+  left: '0% 50%',
+  right: '100% 50%',
+};
+
+/** Öffentliche URL einer hochgeladenen Datei (PDF), Leerzeichen etc. kodiert */
+const fileUrl = (v: unknown) => {
+  const s = text(v);
+  return s ? encodeURI(decodeURI(s)) : undefined;
+};
 
 /* ---------------- Bilder ---------------- */
 
-interface SanityImageField {
-  asset?: { _ref: string };
-  hotspot?: { x: number; y: number };
-  crop?: { top: number; bottom: number; left: number; right: number };
-  alt?: string;
+const WIDTHS = [480, 800, 1200, 1600, 2000, 2560];
+const imageCache = new Map<string, Promise<SiteImage | undefined>>();
+
+/** "/uploads/foo.jpg" → optimiertes Bild mit srcset (WebP) */
+function toImage(path: unknown, alt = '', focus: unknown = 'center'): Promise<SiteImage | undefined> {
+  const raw = text(path);
+  if (!raw) return Promise.resolve(undefined);
+  const key = `${raw}|${alt}|${focus}`;
+  if (!imageCache.has(key)) imageCache.set(key, buildImage(raw, alt, String(focus)));
+  return imageCache.get(key)!;
 }
 
-const WIDTHS = [480, 800, 1200, 1600, 2000, 2560];
-
-function toImage(field: SanityImageField | null | undefined, fallbackAlt = ''): SiteImage | undefined {
-  if (!builder || !field?.asset?._ref) return undefined;
-  // _ref-Format: image-<id>-<breite>x<höhe>-<format>
-  const match = field.asset._ref.match(/-(\d+)x(\d+)-/);
-  const crop = field.crop ?? { top: 0, bottom: 0, left: 0, right: 0 };
-  const cropW = 1 - crop.left - crop.right || 1;
-  const cropH = 1 - crop.top - crop.bottom || 1;
-  // Masse nach einem eventuellen Zuschnitt in Sanity
-  const width = Math.round((match ? Number(match[1]) : 1600) * cropW);
-  const height = Math.round((match ? Number(match[2]) : 1000) * cropH);
-  const maxW = Math.min(width, WIDTHS[WIDTHS.length - 1]);
-  const widths = WIDTHS.filter((w) => w < maxW);
-  widths.push(maxW);
-  const url = (w: number) => builder.image(field).width(w).auto('format').quality(85).url();
-  // Fokuspunkt relativ zum zugeschnittenen Bild
-  const clamp = (v: number) => Math.min(100, Math.max(0, v * 100));
-  const pos = field.hotspot
-    ? `${clamp((field.hotspot.x - crop.left) / cropW).toFixed(1)}% ${clamp((field.hotspot.y - crop.top) / cropH).toFixed(1)}%`
-    : '50% 50%';
+async function buildImage(raw: string, alt: string, focus: string): Promise<SiteImage | undefined> {
+  const rel = decodeURI(raw).replace(/^.*?uploads\//, '');
+  const meta = uploads[`/src/assets/uploads/${rel}`]?.default;
+  if (!meta) {
+    console.warn(`[content] Bild nicht gefunden: ${raw}`);
+    return undefined;
+  }
+  const maxW = Math.min(meta.width, WIDTHS[WIDTHS.length - 1]);
+  const widths = [...WIDTHS.filter((w) => w < maxW), maxW];
+  const variants = await Promise.all(
+    widths.map((w) => getImage({ src: meta, width: w, format: 'webp', quality: 82 })),
+  );
+  const defaultIndex = Math.max(0, widths.findIndex((w) => w >= Math.min(1600, maxW)));
   return {
-    src: url(Math.min(maxW, 1600)),
-    srcset: widths.map((w) => `${url(w)} ${w}w`).join(', '),
-    alt: field.alt || fallbackAlt,
-    width,
-    height,
-    position: pos,
+    src: variants[defaultIndex].src,
+    srcset: variants.map((v, i) => `${v.src} ${widths[i]}w`).join(', '),
+    alt,
+    width: meta.width,
+    height: meta.height,
+    position: focusPositions[focus] ?? focusPositions.center,
   };
 }
 
-const richTextHtml = (blocks: unknown) =>
-  Array.isArray(blocks) && blocks.length
-    ? toHTML(blocks as never, {
-        components: {
-          marks: {
-            link: ({ children, value }) => {
-              const href = String(value?.href ?? '#');
-              const external = /^https?:/.test(href);
-              return `<a href="${href}"${external ? ' target="_blank" rel="noopener"' : ''}>${children}</a>`;
-            },
-          },
-        },
-      })
-    : '';
+/* ---------------- Projekte ---------------- */
 
-/* ---------------- Abfragen ---------------- */
-
-const projectFields = `title, "slug": slug.current, category, tags, description, cover, gallery`;
-
-interface RawProject {
-  title: string;
-  slug: string;
-  category: Category;
-  tags?: string[];
-  description?: string;
-  cover?: SanityImageField;
-  gallery?: SanityImageField[];
-}
-
-const toProject = (p: RawProject): Project => ({
-  slug: p.slug,
-  title: p.title,
-  category: p.category,
-  tags: p.tags ?? [],
-  description: p.description ?? '',
-  cover: toImage(p.cover, p.title),
-  images: (p.gallery ?? []).map((img, i) => toImage(img, `${p.title} – ${i + 1}`)),
-});
-
-// Jede Abfrage nur einmal pro Build
 const memo = <T>(fn: () => Promise<T>) => {
   let cache: Promise<T> | undefined;
   return () => (cache ??= fn());
 };
 
 export const getProjects = memo(async (): Promise<Project[]> => {
-  if (!client) return placeholderProjects;
-  const raw = await client.fetch<RawProject[]>(
-    `*[_type == "project" && defined(slug.current) && defined(category)] | order(orderRank asc) { ${projectFields} }`,
+  const list = await Promise.all(
+    Object.entries(projectFiles).map(async ([file, mod]) => {
+      const fm = mod.frontmatter ?? {};
+      const category = (file.includes('/design/') ? 'design' : 'illustration') as Category;
+      const filename = file.split('/').pop()!.replace(/\.md$/, '');
+      const title = text(fm.title, filename);
+      return {
+        slug: slugify(filename) || slugify(title),
+        title,
+        category,
+        tags: Array.isArray(fm.tags) ? fm.tags.map(String).filter(Boolean) : [],
+        description: text(fm.description),
+        featured: fm.featured === true,
+        order: Number.isFinite(Number(fm.order)) && fm.order !== '' && fm.order !== null ? Number(fm.order) : 999,
+        cover: await toImage(fm.cover, '', fm.coverFocus),
+        images: (
+          await Promise.all(
+            (Array.isArray(fm.gallery) ? fm.gallery : []).map((g: unknown, i: number) =>
+              toImage(g, `${title} – ${i + 1}`),
+            ),
+          )
+        ).filter(Boolean) as SiteImage[],
+      } satisfies Project;
+    }),
   );
-  return raw.map(toProject);
+  return list.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title, 'de'));
 });
 
 export const getProjectsByCategory = async (category: Category) =>
   (await getProjects()).filter((p) => p.category === category);
 
+/* ---------------- Seiten ---------------- */
+
 export const getSettings = memo(async (): Promise<Settings> => {
-  const d = placeholderSettings;
-  if (!client) return d;
-  // „Footer & Kontaktdaten“, „Illustration/Design → Seite“ und „Kontakt-Block“.
-  // Ältere Felder aus „settings“ dienen als Rückfall, damit früher eingetragene Inhalte erhalten bleiben.
-  const r = await client.fetch(`{
-    "s": *[_id == "settings"][0]{ email, instagram, footerSubtitle, ctaTitle, ctaIllustration,
-      illustrationHeader, designHeader,
-      "illustrationPdf": illustrationPdf.asset->url, "designPdf": designPdf.asset->url },
-    "ill": *[_id == "illustrationPage"][0]{ headerImage, "pdf": pdf.asset->url },
-    "des": *[_id == "designPage"][0]{ headerImage, "pdf": pdf.asset->url },
-    "cta": *[_id == "cta"][0]{ title, illustration }
-  }`);
-  const { s, ill, des, cta } = r ?? {};
+  const s = page('settings');
+  const ill = page('illustration');
+  const des = page('design');
+  const cta = page('cta');
   return {
-    email: s?.email || d.email,
-    instagram: s?.instagram || d.instagram,
-    footerSubtitle: s?.footerSubtitle || d.footerSubtitle,
-    pdfs: {
-      illustration: ill?.pdf || s?.illustrationPdf || undefined,
-      design: des?.pdf || s?.designPdf || undefined,
-    },
+    email: text(s.email, 'kendraschlegelart@gmail.com'),
+    instagram: text(s.instagram).replace(/^@/, ''),
+    footerSubtitle: text(s.footerSubtitle, 'Illustration and Graphic Design'),
+    pdfs: { illustration: fileUrl(ill.pdf), design: fileUrl(des.pdf) },
     headers: {
-      illustration: toImage(ill?.headerImage ?? s?.illustrationHeader),
-      design: toImage(des?.headerImage ?? s?.designHeader),
+      illustration: await toImage(ill.headerImage, '', ill.headerFocus),
+      design: await toImage(des.headerImage, '', des.headerFocus),
     },
-    ctaIllustration: toImage(cta?.illustration ?? s?.ctaIllustration),
-    ctaTitle: cta?.title || s?.ctaTitle || d.ctaTitle,
+    ctaIllustration: await toImage(cta.illustration),
+    ctaTitle: text(cta.title, 'You have questions, want to work with me or just have a chat?'),
   };
 });
 
 export const getHome = memo(async (): Promise<Home> => {
-  const d = placeholderHome;
-  if (!client) return { ...d, selected: placeholderProjects.filter((_, i) => [0, 4, 6].includes(i)) };
-  const h = await client.fetch(
-    `*[_id == "home"][0]{ heroImage, intro, "selected": selectedWorks[]->{ ${projectFields} } }`,
-  );
-  const selected: Project[] = (h?.selected ?? []).filter((p: RawProject | null) => p?.slug).map(toProject);
+  const h = page('home');
+  const projects = await getProjects();
+  const featured = projects.filter((p) => p.featured);
   return {
-    hero: toImage(h?.heroImage),
-    intro: h?.intro || d.intro,
-    // Falls noch nichts ausgewählt ist: die ersten drei Projekte
-    selected: selected.length ? selected : (await getProjects()).slice(0, 3),
+    hero: await toImage(h.heroImage, '', h.heroFocus),
+    intro: text(h.intro),
+    // Projekte mit „Auf der Startseite zeigen“; sonst die ersten drei
+    selected: featured.length ? featured : projects.slice(0, 3),
   };
 });
 
 export const getAbout = memo(async (): Promise<About> => {
-  const d = placeholderAbout;
-  if (!client) return d;
-  const a = await client.fetch(`*[_id == "about"][0]{ portrait, greeting, lead, body, contactIllustration }`);
+  const a = page('about');
   return {
-    portrait: toImage(a?.portrait, 'Portrait of Kendra Schlegel'),
-    greeting: a?.greeting || d.greeting,
-    lead: a?.lead || d.lead,
-    bodyHtml: richTextHtml(a?.body) || d.bodyHtml,
-    contactIllustration: toImage(a?.contactIllustration),
+    portrait: await toImage(a.portrait, 'Portrait of Kendra Schlegel', a.portraitFocus),
+    greeting: text(a.greeting, 'Hello!'),
+    lead: text(a.lead),
+    bodyHtml: paragraphs(text(a.body)),
+    contactIllustration: await toImage(a.contactIllustration),
   };
 });
 
 export const getLegal = memo(async (): Promise<Legal> => {
-  const d = placeholderLegal;
-  if (!client) return d;
-  const l = await client.fetch(`*[_id == "legal"][0]{ name, address, body }`);
+  const l = page('legal');
+  const sections: { title?: string; text?: string }[] = Array.isArray(l.sections) ? l.sections : [];
   return {
-    name: l?.name || d.name,
-    address: l?.address || d.address,
-    bodyHtml: richTextHtml(l?.body) || d.bodyHtml,
+    name: text(l.name, 'Kendra Schlegel'),
+    address: text(l.address),
+    bodyHtml: sections
+      .map((s) => `${text(s.title) ? `<h2>${escapeHtml(text(s.title))}</h2>` : ''}${paragraphs(text(s.text))}`)
+      .join(''),
   };
 });

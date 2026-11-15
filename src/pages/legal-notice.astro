@@ -1,5 +1,5 @@
 ---
-/** Impressum – schlichte Textseite im Stil der übrigen Seiten. Inhalte später aus Sanity. */
+/** Impressum – schlichte Textseite im Stil der übrigen Seiten. Inhalte aus src/content/pages/legal.json. */
 import Base from '../layouts/Base.astro';
 import { getLegal, getSettings } from '../lib/content';
 
@@ -75,7 +75,7 @@ const addressLines = legal.address.split('\n').filter(Boolean);
     color: var(--c-orange);
   }
 
-  /* Freier Text aus Sanity: Zwischentitel wie die Blöcke oben */
+  /* Weitere Abschnitte: Zwischentitel wie die Blöcke oben */
   .rich {
     display: flex;
     flex-direction: column;

@@ -3,11 +3,11 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  // Netlify setzt URL automatisch auf die Hauptadresse (später die eigene Domain)
-  site: process.env.URL || 'https://kendrasportfolio.netlify.app',
+  // Hauptadresse der Website – in Cloudflare als Umgebungsvariable SITE_URL setzen, sobald die Domain steht
+  site: process.env.SITE_URL || 'https://kendras-portfolio.pages.dev',
   integrations: [
     sitemap({
-      filter: (page) => !/\/(thanks|404)\/?$/.test(page),
+      filter: (page) => !/\/404\/?$/.test(page),
     }),
   ],
 });

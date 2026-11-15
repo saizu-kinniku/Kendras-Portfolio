@@ -3,9 +3,10 @@
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
 import Img from '../components/Img.astro';
-import { getAbout } from '../lib/content';
+import { getAbout, getSettings } from '../lib/content';
 
 const about = await getAbout();
+const { email } = await getSettings();
 ---
 
 <Base title="About & Contact" active="about" description={about.lead} image={about.portrait}>
@@ -28,11 +29,8 @@ const about = await getAbout();
     </div>
     <div class="form-col">
       <h2 class="t-name">Get in touch</h2>
-      <form name="contact" method="POST" action="/thanks/" data-netlify="true" netlify-honeypot="bot-field" class="form">
-        <input type="hidden" name="form-name" value="contact" />
-        <p class="visually-hidden">
-          <label>Don’t fill this out: <input name="bot-field" /></label>
-        </p>
+      <!-- Kein Server: „Send“ öffnet das Mailprogramm mit allen Angaben (siehe Script unten) -->
+      <form class="form" id="contact-form" data-email={email} action={`mailto:${email}`} method="get">
         <div class="fields">
           <label class="field">
             <span class="visually-hidden">Name</span>
@@ -48,10 +46,44 @@ const about = await getAbout();
           </label>
         </div>
         <Button type="submit">Send</Button>
+        <p class="t-body fallback">
+          Your email program will open with your message. If nothing happens, write to{' '}
+          <a href={`mailto:${email}`}>{email}</a>{' '}
+          <button type="button" class="copy" data-copy={email}>Copy address</button>
+        </p>
       </form>
     </div>
   </section>
 </Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#contact-form');
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    const data = new FormData(form);
+    const name = String(data.get('name') ?? '').trim();
+    const from = String(data.get('email') ?? '').trim();
+    const message = String(data.get('message') ?? '').trim();
+    const subject = `Website inquiry from ${name}`;
+    const body = `${message}\n\n—\n${name}\n${from}`;
+    window.location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
+
+  // Adresse kopieren, falls sich kein Mailprogramm öffnet
+  document.querySelectorAll<HTMLButtonElement>('.copy').forEach((button) => {
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? '');
+        button.textContent = 'Copied!';
+      } catch {
+        button.textContent = 'Please copy manually';
+      }
+      setTimeout(() => (button.textContent = 'Copy address'), 2000);
+    });
+  });
+</script>
 
 <style>
   /* ---------- About ---------- */
@@ -194,6 +226,34 @@ const about = await getAbout();
     height: 211px;
     padding-top: 24px;
     resize: vertical;
+  }
+
+  .fallback {
+    max-width: 560px;
+    color: var(--c-offblack);
+    font-size: 16px;
+    text-box: none;
+  }
+
+  .fallback a {
+    text-decoration: underline;
+    text-underline-position: from-font;
+  }
+
+  .copy {
+    margin-left: 6px;
+    padding: 2px 10px;
+    border: 1px solid var(--c-offblack);
+    border-radius: 20px;
+    background: transparent;
+    font-family: var(--f-body);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .copy:hover {
+    border-color: var(--c-orange);
+    color: var(--c-orange);
   }
 
   .field ::placeholder {
