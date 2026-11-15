@@ -5,7 +5,7 @@ import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {schemaTypes, singletons} from './schemaTypes'
 
 // Projekt-ID aus sanity.io/manage – wird beim Build über die Umgebungsvariable gesetzt
-const projectId = process.env.SANITY_STUDIO_PROJECT_ID || 'replace-me'
+const projectId = process.env.SANITY_STUDIO_PROJECT_ID || 'kkd7bqq0'
 const dataset = process.env.SANITY_STUDIO_DATASET || 'production'
 
 const singletonTypes = new Set<string>(singletons.map((s) => s.type))

@@ -17,7 +17,9 @@ import {
   type SiteImage,
 } from '../data/projects';
 
-const projectId = import.meta.env.SANITY_PROJECT_ID as string | undefined;
+// Projekt-ID ist öffentlich (steckt ohnehin im Studio). Mit SANITY_PROJECT_ID="" lässt sich lokal ohne Sanity arbeiten.
+const envProjectId = import.meta.env.SANITY_PROJECT_ID as string | undefined;
+const projectId = envProjectId === undefined ? 'kkd7bqq0' : envProjectId || undefined;
 const dataset = (import.meta.env.SANITY_DATASET as string | undefined) || 'production';
 
 /** Ohne Projekt-ID läuft die Seite mit Platzhaltern (z. B. lokal vor dem Setup) */

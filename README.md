@@ -11,16 +11,15 @@ Astro-Website + Sanity Studio (unter `/studio`), gehostet auf Netlify.
 
 ```bash
 npm install
-cp .env.example .env          # SANITY_PROJECT_ID eintragen
 npm run dev                   # Website: http://localhost:4321
 
 # Studio lokal
-echo "SANITY_STUDIO_PROJECT_ID=<id>" > studio/.env
 npm --prefix studio install
 npm run studio                # http://localhost:3333/studio
 ```
 
-Ohne `SANITY_PROJECT_ID` läuft die Website mit Platzhaltern.
+Sanity-Projekt: `kkd7bqq0`, Dataset `production` (fest eingetragen, per Umgebungsvariable überschreibbar).
+Mit `SANITY_PROJECT_ID="" npm run dev` läuft die Website ohne Sanity, nur mit Platzhaltern.
 
 ## Inhalte (Sanity)
 
@@ -38,9 +37,8 @@ Leere Felder fallen auf die Platzhalter in `src/data/projects.ts` zurück.
 ## Einmalige Einrichtung
 
 ### 1. Sanity (sanity.io/manage → Projekt)
-1. **Project ID** notieren (Dataset: `production`).
-2. **Members** → Luis als Administrator einladen.
-3. **API → CORS origins** → hinzufügen, jeweils mit „Allow credentials“:
+1. Project ID: `kkd7bqq0` · Dataset: `production` (muss existieren).
+2. **API → CORS origins** → hinzufügen, jeweils mit „Allow credentials“:
    - `http://localhost:3333`
    - `https://<netlify-name>.netlify.app`
    - `https://<eigene-domain>` (sobald verbunden)
@@ -50,9 +48,7 @@ Repository mit diesem Code (Kendra ist Owner, Luis Collaborator).
 
 ### 3. Netlify (Kendras Konto)
 1. **Add new project → Import from Git** → Repository wählen. Build-Einstellungen kommen aus `netlify.toml`.
-2. **Project configuration → Environment variables**:
-   - `SANITY_PROJECT_ID` = Project ID aus Schritt 1
-   - `SANITY_DATASET` = `production`
+2. Umgebungsvariablen sind nicht nötig (Projekt-ID ist im Code).
 3. **Build & deploy → Build hooks** → Hook „Sanity“ anlegen, URL kopieren.
 4. **Forms** → Formularerkennung aktivieren; unter *Form notifications* E-Mail an Kendra einrichten.
 
