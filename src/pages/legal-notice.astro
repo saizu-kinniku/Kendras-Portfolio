@@ -1,0 +1,118 @@
+---
+/** Impressum – schlichte Textseite im Stil der übrigen Seiten. Inhalte später aus Sanity. */
+import Base from '../layouts/Base.astro';
+import { getLegal, getSettings } from '../lib/content';
+
+const legal = await getLegal();
+const { email } = await getSettings();
+const addressLines = legal.address.split('\n').filter(Boolean);
+---
+
+<Base title="Legal Notice">
+  <section class="legal">
+    <h1 class="t-headline">Legal Notice</h1>
+
+    <div class="t-body content">
+      <div class="block">
+        <h2 class="t-subline">Contact</h2>
+        <p>
+          {legal.name}
+          {addressLines.map((line) => (<><br />{line}</>))}
+        </p>
+        <p>E-Mail: <a href={`mailto:${email}`}>{email}</a></p>
+      </div>
+
+      <div class="block">
+        <h2 class="t-subline">Responsible for content</h2>
+        <p>{legal.name}</p>
+      </div>
+
+      <div class="rich" set:html={legal.bodyHtml} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .legal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 80px;
+    padding: 160px var(--page-pad) 160px;
+  }
+
+  .legal h1 {
+    color: var(--c-black);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+    width: 878px;
+    max-width: 100%;
+    padding: 0 40px;
+    color: var(--c-offblack);
+  }
+
+  .block {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .block p {
+    text-box: none;
+  }
+
+  .block a {
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+  }
+
+  .block a:hover {
+    color: var(--c-orange);
+  }
+
+  /* Freier Text aus Sanity: Zwischentitel wie die Blöcke oben */
+  .rich {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .rich :global(h2) {
+    margin-top: 30px;
+    font-family: var(--f-head);
+    font-size: var(--t-subline);
+    font-weight: 400;
+    line-height: normal;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .rich :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .rich :global(a) {
+    text-decoration: underline;
+    text-underline-position: from-font;
+  }
+
+  @media (max-width: 1100px) {
+    .legal {
+      gap: var(--space-l);
+      padding: var(--space-xl) var(--page-pad);
+    }
+
+    .content {
+      gap: var(--space-s);
+      padding: 0;
+    }
+
+    .block {
+      gap: 16px;
+    }
+  }
+</style>

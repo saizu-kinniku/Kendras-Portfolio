@@ -1,0 +1,294 @@
+---
+/** Figma: "About & Contact" */
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import Img from '../components/Img.astro';
+import { getAbout } from '../lib/content';
+
+const about = await getAbout();
+---
+
+<Base title="About & Contact" active="about">
+  <section class="about">
+    <div class="text-col">
+      <div class="text">
+        <h1 class="hello">{about.greeting}</h1>
+        <p class="t-subline lead">{about.lead}</p>
+        <div class="t-body body" set:html={about.bodyHtml} />
+      </div>
+    </div>
+    <div class="portrait">
+      {about.portrait && <Img image={about.portrait} sizes="(max-width: 700px) 100vw, 45vw" loading="eager" />}
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="illu">
+      {about.contactIllustration && <Img image={about.contactIllustration} sizes="(max-width: 700px) 100vw, 515px" />}
+    </div>
+    <div class="form-col">
+      <h2 class="t-name">Get in touch</h2>
+      <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="form">
+        <input type="hidden" name="form-name" value="contact" />
+        <p class="visually-hidden">
+          <label>Don’t fill this out: <input name="bot-field" /></label>
+        </p>
+        <div class="fields">
+          <label class="field">
+            <span class="visually-hidden">Name</span>
+            <input type="text" name="name" placeholder="Name" autocomplete="name" required />
+          </label>
+          <label class="field">
+            <span class="visually-hidden">E-Mail</span>
+            <input type="email" name="email" placeholder="E-Mail" autocomplete="email" required />
+          </label>
+          <label class="field field-message">
+            <span class="visually-hidden">Message</span>
+            <textarea name="message" placeholder="Message" required></textarea>
+          </label>
+        </div>
+        <Button type="submit">Send</Button>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---------- About ---------- */
+  .about {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 60px;
+    padding: 40px 0 0 var(--page-pad);
+  }
+
+  .text-col {
+    display: flex;
+    flex: 1 0 0;
+    align-self: stretch;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: 0 40px;
+  }
+
+  .text {
+    color: var(--c-black);
+  }
+
+  .hello {
+    color: var(--c-orange);
+    font-family: var(--f-head);
+    font-size: var(--t-headline);
+    line-height: 1.625;
+    text-box: trim-start cap alphabetic;
+  }
+
+  .lead,
+  .body :global(p) {
+    text-box: none;
+  }
+
+  /* Zwei Leerzeilen (Syne 20px) zwischen Lead und Fliesstext, je eine zwischen Absätzen – wie in Figma */
+  .body {
+    margin-top: calc(2 * 1.2em);
+  }
+
+  .body :global(* + *) {
+    margin-top: 1.2em;
+  }
+
+  .body :global(h2) {
+    font-family: var(--f-head);
+    font-size: var(--t-body);
+    font-weight: 400;
+  }
+
+  .body :global(a) {
+    text-decoration: underline;
+    text-underline-position: from-font;
+  }
+
+  .body :global(:last-child) {
+    text-box: trim-end cap alphabetic;
+  }
+
+  .portrait {
+    flex-shrink: 0;
+    width: min(644px, 45%);
+    aspect-ratio: 644 / 928;
+    background: var(--c-placeholder);
+  }
+
+  .portrait,
+  .illu {
+    overflow: hidden;
+  }
+
+  .portrait :global(img),
+  .illu :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- Contact ---------- */
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 100px;
+    padding: 80px var(--page-pad) 40px;
+    background: var(--c-butter);
+  }
+
+  .illu {
+    flex-shrink: 0;
+    width: 515px;
+    height: 514px;
+    background: var(--c-white);
+  }
+
+  .form-col {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 693px;
+    max-width: 100%;
+    color: var(--c-black);
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
+  }
+
+  .fields {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 690px;
+    max-width: 100%;
+  }
+
+  .field input,
+  .field textarea {
+    display: block;
+    width: 100%;
+    height: 73px;
+    padding: 0 21px;
+    border: 1px solid var(--c-black);
+    border-radius: var(--radius-input);
+    background: transparent;
+    font-family: var(--f-body);
+    font-size: var(--t-body);
+    line-height: normal;
+    color: var(--c-black);
+  }
+
+  .field textarea {
+    height: 211px;
+    padding-top: 24px;
+    resize: vertical;
+  }
+
+  .field ::placeholder {
+    color: var(--c-black);
+    opacity: 1;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: 2px solid var(--c-orange);
+    outline-offset: -1px;
+  }
+
+  @media (max-width: 1100px) {
+    .about {
+      gap: var(--space-s);
+    }
+
+    .about {
+      align-items: stretch;
+    }
+
+    .text-col {
+      padding: var(--space-s) 0;
+    }
+
+    .portrait {
+      aspect-ratio: auto;
+    }
+
+    .contact {
+      flex-wrap: nowrap;
+      gap: var(--space-m);
+      padding: var(--space-l) var(--page-pad);
+    }
+
+    .illu {
+      width: min(515px, 40%);
+      height: auto;
+      aspect-ratio: 515 / 514;
+    }
+
+    .form-col {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .fields {
+      width: 100%;
+    }
+
+    .form-col,
+    .form {
+      gap: var(--space-s);
+    }
+  }
+
+  /* Mobile: Porträt oben, Text darunter; Kontakt untereinander */
+  @media (max-width: 700px) {
+    .about {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0;
+    }
+
+    .portrait {
+      order: -1;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+    }
+
+    .text-col {
+      padding: var(--space-s) var(--page-pad) var(--space-l);
+    }
+
+    .contact {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .illu {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 515 / 514;
+    }
+
+    .field input {
+      height: 60px;
+      padding: 0 16px;
+    }
+
+    .field textarea {
+      height: 180px;
+      padding: 18px 16px;
+    }
+  }
+</style>

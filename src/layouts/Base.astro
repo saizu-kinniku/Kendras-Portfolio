@@ -1,0 +1,42 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  active?: 'illustration' | 'design' | 'about';
+}
+
+const {
+  title,
+  description = 'Kendra Schlegel – illustrator and graphic designer based in Switzerland.',
+  active,
+} = Astro.props;
+
+const fullTitle = title ? `${title} – Kendra Schlegel` : 'Kendra Schlegel – Illustration and Graphic Design';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body id="top">
+    <Nav active={active} />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style is:global>
+  html {
+    scroll-behavior: smooth;
+  }
+</style>

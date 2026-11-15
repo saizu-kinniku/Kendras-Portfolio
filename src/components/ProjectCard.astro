@@ -1,0 +1,161 @@
+---
+/** Figma: "project card big" (1000 × 636) und "project card small" (613 × 464) */
+import cardIcon from '../assets/icons/card-icon.svg';
+import cardIconHover from '../assets/icons/card-icon-hover.svg';
+import Img from './Img.astro';
+import type { SiteImage } from '../data/projects';
+
+interface Props {
+  href: string;
+  title: string;
+  tags: string[];
+  image?: SiteImage;
+  size?: 'big' | 'small';
+}
+
+const { href, title, tags, image, size = 'small' } = Astro.props;
+const sizes = size === 'big' ? '(max-width: 1080px) 100vw, 1000px' : '(max-width: 700px) 100vw, (max-width: 1400px) 50vw, 613px';
+---
+
+<a class:list={['card', `card-${size}`]} href={href}>
+  <div class="media">
+    {image && <Img class="cover" image={image} sizes={sizes} alt="" />}
+    <span class="icon" aria-hidden="true">
+      <img class="icon-base" src={cardIcon.src} width={cardIcon.width} height={cardIcon.height} alt="" />
+      <img class="icon-hover" src={cardIconHover.src} width={cardIconHover.width} height={cardIconHover.height} alt="" />
+    </span>
+  </div>
+  <div class="text">
+    <h3 class="title t-subline">{title}</h3>
+    <p class="tags t-body">{tags.join(', ')}</p>
+  </div>
+</a>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+  }
+
+  .card-big {
+    max-width: 1000px;
+  }
+
+  .card-small {
+    max-width: 613px;
+  }
+
+  .media {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 20px;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--c-placeholder);
+    transition: background-color 0.25s ease;
+  }
+
+  /* Seitenverhältnisse aus Figma, damit die Karten mitskalieren */
+  .card-big .media {
+    aspect-ratio: 1000 / 542;
+  }
+
+  .card-small .media {
+    aspect-ratio: 613 / 370;
+  }
+
+  @media (max-width: 700px) {
+    .card {
+      gap: 20px;
+    }
+
+    .media {
+      border-radius: 20px;
+    }
+
+    .card-big .media,
+    .card-small .media {
+      aspect-ratio: 4 / 3;
+    }
+
+    .text {
+      gap: 12px;
+    }
+
+    .title,
+    .tags {
+      padding: 0;
+    }
+  }
+
+  .media :global(.cover) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.25s ease;
+  }
+
+  .icon {
+    position: relative;
+    display: grid;
+    width: 49px;
+    height: 49px;
+  }
+
+  .icon img {
+    grid-area: 1 / 1;
+    width: 49px;
+    height: 49px;
+  }
+
+  .icon-hover {
+    opacity: 0;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .title {
+    width: 100%;
+    padding: 0 30px;
+    color: var(--c-black);
+  }
+
+  .tags {
+    width: 100%;
+    padding: 0 20px;
+    color: var(--c-offblack);
+  }
+
+  /* Hover: Bildfläche auf 50 % */
+  .card:hover .media,
+  .card:focus-visible .media {
+    background: rgba(217, 217, 217, 0.5);
+  }
+
+  .card:hover .media :global(.cover),
+  .card:focus-visible .media :global(.cover) {
+    opacity: 0.5;
+  }
+
+  .card:hover .icon-base,
+  .card:focus-visible .icon-base {
+    opacity: 0;
+  }
+
+  .card:hover .icon-hover,
+  .card:focus-visible .icon-hover {
+    opacity: 1;
+  }
+</style>

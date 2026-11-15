@@ -1,0 +1,160 @@
+---
+/** Figma: "Landing Page" */
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Cta from '../components/Cta.astro';
+import Img from '../components/Img.astro';
+import { projectUrl, categoryUrl } from '../data/projects';
+import { getHome, getSettings } from '../lib/content';
+
+const home = await getHome();
+const settings = await getSettings();
+---
+
+<Base>
+  <section class="hero">
+    <div class="hero-media">
+      {home.hero && <Img image={home.hero} sizes="100vw" loading="eager" />}
+    </div>
+    <div class="hero-content">
+      <p class="t-body intro">{home.intro}</p>
+      <div class="hero-buttons">
+        <Button href={settings.pdfs.illustration}>Illustration portfolio PDF</Button>
+        <Button href={settings.pdfs.design}>Design portfolio PDF</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="selected">
+    <h1 class="t-headline">Selected works</h1>
+    {
+      home.selected.map((p) => (
+        <ProjectCard size="big" href={projectUrl(p)} title={p.title} tags={p.tags} image={p.cover} />
+      ))
+    }
+  </section>
+
+  <section class="discover">
+    <Button href={categoryUrl('illustration')}>discover my illustration work</Button>
+    <Button href={categoryUrl('design')}>discover my design work</Button>
+  </section>
+
+  <Cta />
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 1280 / 720;
+    padding: 40px 60px;
+  }
+
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--c-placeholder);
+  }
+
+  .hero-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-content {
+    position: relative;
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 40px;
+    width: 800px;
+    max-width: 100%;
+  }
+
+  .intro {
+    width: 622px;
+    max-width: 100%;
+    color: var(--c-offblack);
+  }
+
+  .hero-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .selected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 80px;
+    padding: 160px var(--page-pad) 80px;
+  }
+
+  .selected h1 {
+    color: var(--c-black);
+    white-space: nowrap;
+  }
+
+  .discover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 160px;
+    /* Figma: Frame 220px hoch, Buttons bei y=47.5 */
+    padding: 47.5px 160px 107.5px;
+  }
+
+  @media (max-width: 1100px) {
+    .hero {
+      padding: var(--page-pad);
+    }
+
+    .hero-content {
+      gap: var(--space-s);
+    }
+
+    .selected {
+      gap: var(--space-l);
+      padding: var(--space-xl) var(--page-pad) var(--space-l);
+    }
+
+    .discover {
+      gap: 24px;
+      padding: var(--space-s) var(--page-pad) var(--space-l);
+    }
+  }
+
+  /* Mobile: Bild hochformatig oben, Text und Buttons darunter */
+  @media (max-width: 700px) {
+    .hero {
+      aspect-ratio: auto;
+      padding: 0;
+    }
+
+    .hero-media {
+      position: static;
+      aspect-ratio: 4 / 5;
+    }
+
+    .hero-content {
+      padding: var(--space-s) var(--page-pad) 0;
+    }
+
+    .selected h1 {
+      white-space: normal;
+      text-align: center;
+    }
+
+    .discover {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+</style>

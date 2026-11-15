@@ -1,0 +1,80 @@
+---
+/** Figma: "select with arrow" – left/right, default/hover */
+import arrowRight from '../assets/icons/arrow-right.svg';
+import arrowRightHover from '../assets/icons/arrow-right-hover.svg';
+import arrowLeft from '../assets/icons/arrow-left.svg';
+import arrowLeftHover from '../assets/icons/arrow-left-hover.svg';
+
+interface Props {
+  href: string;
+  direction?: 'left' | 'right';
+}
+
+const { href, direction = 'right' } = Astro.props;
+const icons =
+  direction === 'left'
+    ? { base: arrowLeft, hover: arrowLeftHover }
+    : { base: arrowRight, hover: arrowRightHover };
+---
+
+<a class:list={['arrow-link', `dir-${direction}`]} href={href}>
+  <span class="arrow" aria-hidden="true">
+    <img class="icon icon-base" src={icons.base.src} width={icons.base.width} height={icons.base.height} alt="" />
+    <img class="icon icon-hover" src={icons.hover.src} width={icons.hover.width} height={icons.hover.height} alt="" />
+  </span>
+  <span class="label trim"><slot /></span>
+</a>
+
+<style>
+  .arrow-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    color: var(--c-black);
+    font-family: var(--f-body);
+    font-size: var(--t-body);
+    line-height: normal;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+
+  .dir-right {
+    flex-direction: row-reverse;
+  }
+
+  .arrow {
+    display: grid;
+    flex-shrink: 0;
+  }
+
+  .icon {
+    grid-area: 1 / 1;
+  }
+
+  .icon-hover {
+    opacity: 0;
+  }
+
+  .arrow-link:hover,
+  .arrow-link:focus-visible {
+    color: var(--c-orange);
+  }
+
+  .arrow-link:hover .label,
+  .arrow-link:focus-visible .label {
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+  }
+
+  .arrow-link:hover .icon-base,
+  .arrow-link:focus-visible .icon-base {
+    opacity: 0;
+  }
+
+  .arrow-link:hover .icon-hover,
+  .arrow-link:focus-visible .icon-hover {
+    opacity: 1;
+  }
+</style>

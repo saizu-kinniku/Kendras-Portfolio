@@ -1,0 +1,27 @@
+---
+/** Responsives Bild aus Sanity: srcset, Fokuspunkt als object-position */
+import type { SiteImage } from '../data/projects';
+
+interface Props {
+  image: SiteImage;
+  sizes: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  alt?: string;
+}
+
+const { image, sizes, class: className, loading = 'lazy', alt } = Astro.props;
+---
+
+<img
+  class={className}
+  src={image.src}
+  srcset={image.srcset}
+  sizes={sizes}
+  width={image.width}
+  height={image.height}
+  alt={alt ?? image.alt}
+  loading={loading}
+  decoding="async"
+  style={`object-position: ${image.position}`}
+/>

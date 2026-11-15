@@ -1,0 +1,71 @@
+---
+/** Figma: "Buttons Final" – orange def / orange hover */
+interface Props {
+  href?: string;
+  type?: 'button' | 'submit';
+  download?: boolean;
+  class?: string;
+}
+
+const { href, type = 'button', download, class: className } = Astro.props;
+---
+
+{
+  href ? (
+    <a class:list={['button', className]} href={href} download={download || undefined}>
+      <slot />
+    </a>
+  ) : (
+    <button class:list={['button', className]} type={type}>
+      <slot />
+    </button>
+  )
+}
+
+<style>
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 65px;
+    min-width: 250px;
+    padding: 15px 35px;
+    border: 2px solid var(--c-orange);
+    border-radius: var(--radius-button);
+    background: var(--c-orange);
+    color: var(--c-white);
+    font-family: var(--f-body);
+    font-size: var(--t-body);
+    line-height: normal;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .button:hover,
+  .button:focus-visible {
+    background: var(--c-white);
+    color: var(--c-orange);
+  }
+
+  .button:focus-visible {
+    outline: 2px solid var(--c-offblack);
+    outline-offset: 3px;
+  }
+
+  /* Mobile: Buttons in voller Breite, Text darf umbrechen */
+  @media (max-width: 700px) {
+    .button {
+      width: 100%;
+      min-width: 0;
+      height: auto;
+      min-height: 56px;
+      padding: 14px 24px;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+</style>

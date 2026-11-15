@@ -1,0 +1,191 @@
+---
+/** Figma: "Nav" (Höhe 100px). Unter 960px: Burger mit Vollbild-Menü. */
+import NavLink from './NavLink.astro';
+
+interface Props {
+  active?: 'illustration' | 'design' | 'about';
+}
+
+const { active } = Astro.props;
+
+const items = [
+  { href: '/illustration/', label: 'Illustration', key: 'illustration' },
+  { href: '/design/', label: 'Design Work', key: 'design' },
+  { href: '/about/', label: 'About & Contact', key: 'about' },
+] as const;
+---
+
+<header class="nav">
+  <a class="logo t-subline" href="/">Kendra Schlegel</a>
+
+  <nav class="links" aria-label="Hauptnavigation">
+    <div class="group">
+      <NavLink href={items[0].href} active={active === 'illustration'}>{items[0].label}</NavLink>
+      <NavLink href={items[1].href} active={active === 'design'}>{items[1].label}</NavLink>
+    </div>
+    <NavLink href={items[2].href} active={active === 'about'}>{items[2].label}</NavLink>
+  </nav>
+
+  <button class="burger" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menü öffnen">
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <nav aria-label="Mobile Navigation">
+      <ul>
+        <li><a class:list={['t-name', { 'is-active': !active }]} href="/">Home</a></li>
+        {
+          items.map((item) => (
+            <li>
+              <a
+                class:list={['t-name', { 'is-active': active === item.key }]}
+                href={item.href}
+                aria-current={active === item.key ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const burger = document.querySelector<HTMLButtonElement>('.burger');
+  const menu = document.querySelector<HTMLElement>('#mobile-menu');
+
+  const setOpen = (open: boolean) => {
+    if (!burger || !menu) return;
+    burger.setAttribute('aria-expanded', String(open));
+    burger.setAttribute('aria-label', open ? 'Menü schliessen' : 'Menü öffnen');
+    menu.hidden = !open;
+    document.documentElement.classList.toggle('menu-open', open);
+  };
+
+  burger?.addEventListener('click', () => setOpen(burger.getAttribute('aria-expanded') !== 'true'));
+  menu?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+  window.matchMedia('(min-width: 961px)').addEventListener('change', (e) => {
+    if (e.matches) setOpen(false);
+  });
+</script>
+
+<style>
+  .nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100px;
+    padding: 0 var(--page-pad);
+  }
+
+  .logo {
+    position: relative;
+    z-index: 21;
+    color: var(--c-offblack);
+    white-space: nowrap;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .links,
+  .group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  /* ---------- Burger ---------- */
+  .burger {
+    position: relative;
+    z-index: 21;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    width: 44px;
+    height: 44px;
+    padding: 0 6px;
+    margin-right: -6px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .burger span {
+    display: block;
+    height: 2px;
+    background: var(--c-offblack);
+    transition: transform 0.25s ease;
+  }
+
+  .burger[aria-expanded='true'] span:first-child {
+    transform: translateY(5px) rotate(45deg);
+  }
+
+  .burger[aria-expanded='true'] span:last-child {
+    transform: translateY(-5px) rotate(-45deg);
+  }
+
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    padding: 140px var(--page-pad) var(--page-pad);
+    background: var(--c-white);
+    overflow-y: auto;
+  }
+
+  .mobile-menu[hidden] {
+    display: none;
+  }
+
+  .mobile-menu ul {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mobile-menu a {
+    color: var(--c-offblack);
+    transition: color 0.2s ease;
+  }
+
+  .mobile-menu a:hover,
+  .mobile-menu a.is-active {
+    color: var(--c-orange);
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+  }
+
+  :global(html.menu-open) {
+    overflow: hidden;
+  }
+
+  @media (max-width: 960px) {
+    .nav {
+      height: 80px;
+    }
+
+    .links {
+      display: none;
+    }
+
+    .burger {
+      display: flex;
+    }
+  }
+</style>

@@ -1,0 +1,139 @@
+---
+/** Figma: "Project" */
+import Base from '../../layouts/Base.astro';
+import ArrowLink from '../../components/ArrowLink.astro';
+import Cta from '../../components/Cta.astro';
+import Img from '../../components/Img.astro';
+import { categoryLabels, categoryUrl, type Project } from '../../data/projects';
+import { getProjects } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const other = project.category === 'illustration' ? 'design' : 'illustration';
+---
+
+<Base title={project.title} active={project.category}>
+  <section class="project">
+    <header class="intro">
+      <h1 class="t-headline">{project.title}</h1>
+      {project.description && <p class="t-body meta">{project.description}</p>}
+    </header>
+
+    <div class="gallery">
+      {
+        project.images.map((image, i) =>
+          image ? (
+            <Img image={image} sizes="(max-width: 1360px) 100vw, 1280px" loading={i === 0 ? 'eager' : 'lazy'} />
+          ) : (
+            <div class="placeholder" aria-hidden="true" />
+          ),
+        )
+      }
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Projektnavigation">
+    <ArrowLink href={categoryUrl(project.category)} direction="left">Back to overview</ArrowLink>
+    <ArrowLink href={categoryUrl(other)} direction="right">See {categoryLabels[other].nav.replace('Work', 'work')}</ArrowLink>
+  </nav>
+
+  <Cta />
+</Base>
+
+<style>
+  .project {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 80px;
+    padding: 160px var(--page-pad) 80px;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    width: 878px;
+    max-width: 100%;
+    padding: 0 40px;
+    color: var(--c-black);
+    text-align: center;
+  }
+
+  .intro h1 {
+    width: 100%;
+  }
+
+  .meta {
+    width: 100%;
+  }
+
+  .gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 1280px;
+    max-width: 100%;
+  }
+
+  /* Echte Bilder im Originalformat (nicht beschnitten), Platzhalter 16:9 wie in Figma */
+  .gallery :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .placeholder {
+    width: 100%;
+    aspect-ratio: 1280 / 720;
+    background: var(--c-placeholder-light);
+  }
+
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding: 20px 160px 80px;
+  }
+
+  @media (max-width: 1100px) {
+    .project {
+      gap: var(--space-l);
+      padding: var(--space-xl) var(--page-pad) var(--space-l);
+    }
+
+    .intro {
+      gap: var(--space-s);
+      padding: 0;
+    }
+
+    .gallery {
+      gap: var(--space-s);
+    }
+
+    .pager {
+      padding: 20px var(--page-pad) var(--space-l);
+    }
+  }
+
+  @media (max-width: 700px) {
+    .gallery {
+      gap: 16px;
+    }
+
+    .pager :global(.arrow-link) {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+</style>

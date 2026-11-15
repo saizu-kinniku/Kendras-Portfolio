@@ -1,0 +1,124 @@
+---
+/** Figma: "Portfolio Overview" – gleiche Vorlage für Illustration und Design */
+import Base from '../layouts/Base.astro';
+import Button from './Button.astro';
+import ProjectCard from './ProjectCard.astro';
+import Cta from './Cta.astro';
+import Img from './Img.astro';
+import { categoryLabels, projectUrl, type Category } from '../data/projects';
+import { getProjectsByCategory, getSettings } from '../lib/content';
+
+interface Props {
+  category: Category;
+}
+
+const { category } = Astro.props;
+const label = categoryLabels[category];
+const items = await getProjectsByCategory(category);
+const settings = await getSettings();
+const header = settings.headers[category];
+---
+
+<Base title={label.title} active={category}>
+  <section class="hero">
+    {header && <Img image={header} sizes="100vw" loading="eager" />}
+  </section>
+
+  <section class="overview">
+    <h1 class="t-headline">{label.title}</h1>
+    <div class="grid">
+      {
+        items.map((p) => (
+          <ProjectCard size="small" href={projectUrl(p)} title={p.title} tags={p.tags} image={p.cover} />
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="download">
+    <h2 class="t-name">Download PDF Version</h2>
+    <Button href={settings.pdfs[category]}>PDF Portfolio</Button>
+  </section>
+
+  <Cta />
+</Base>
+
+<style>
+  .hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero {
+    overflow: hidden;
+    height: clamp(220px, 25.55vw, 400px);
+    background: var(--c-placeholder);
+  }
+
+  .overview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    /* Figma: Main px 160, die Kartengruppe (1286px) liegt aber bei x=140 */
+    padding: 80px 140px;
+  }
+
+  .overview h1 {
+    color: var(--c-black);
+    white-space: nowrap;
+  }
+
+  .grid {
+    display: grid;
+    width: 100%;
+    justify-content: center;
+    grid-template-columns: repeat(2, minmax(0, 613px));
+    align-items: start;
+    gap: 60px;
+  }
+
+  .download {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 80px;
+    padding: 80px var(--page-pad);
+  }
+
+  .download h2 {
+    color: var(--c-black);
+    text-transform: capitalize;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1100px) {
+    .overview {
+      padding: var(--space-l) var(--page-pad);
+      gap: var(--space-m);
+    }
+
+    .grid {
+      gap: var(--space-m) 24px;
+    }
+
+    .download {
+      gap: var(--space-s);
+      padding: var(--space-l) var(--page-pad);
+    }
+  }
+
+  @media (max-width: 700px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+      width: 100%;
+    }
+
+    .overview h1,
+    .download h2 {
+      white-space: normal;
+      text-align: center;
+    }
+  }
+</style>

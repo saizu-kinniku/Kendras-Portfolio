@@ -1,0 +1,140 @@
+---
+/** Figma: "Footer" */
+import Button from './Button.astro';
+import NavLink from './NavLink.astro';
+import { getSettings } from '../lib/content';
+
+const { email } = await getSettings();
+---
+
+<footer class="footer">
+  <div class="left">
+    <div class="brand">
+      <p class="t-name name">Kendra Schlegel</p>
+      <p class="subtitle">Illustration and Graphic Design</p>
+    </div>
+    <a class="t-body mail" href={`mailto:${email}`}>{email}</a>
+    <Button href="#top">Back to top</Button>
+  </div>
+  <nav class="right" aria-label="Footer">
+    <NavLink href="/" tone="light">Home</NavLink>
+    <NavLink href="/illustration/" tone="light">Illustration</NavLink>
+    <NavLink href="/design/" tone="light">Design</NavLink>
+    <NavLink href="/about/" tone="light">About &amp; Contact</NavLink>
+    <NavLink href="/legal-notice/" tone="light">Legal Notice</NavLink>
+  </nav>
+</footer>
+
+<style>
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 100px 90px;
+    padding: var(--page-pad);
+    background: var(--c-offblack);
+    color: var(--c-white);
+  }
+
+  .left,
+  .right {
+    width: 693px;
+    max-width: 100%;
+    padding: 20px 0;
+  }
+
+  .left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 60px;
+  }
+
+  .name {
+    color: var(--c-orange);
+    text-box: trim-start cap alphabetic;
+  }
+
+  .subtitle {
+    font-family: var(--f-head);
+    font-size: var(--t-footer-sub);
+    line-height: 1.72; /* 55 / 32 */
+    text-box: trim-end cap alphabetic;
+  }
+
+  .mail {
+    text-box: trim-both cap alphabetic;
+  }
+
+  .right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 20px;
+    height: 311px;
+  }
+
+  /* Tablet: beide Spalten nebeneinander statt umbrechen */
+  @media (max-width: 1100px) {
+    .footer {
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      gap: var(--space-m);
+    }
+
+    .left,
+    .right {
+      width: auto;
+    }
+
+    .left {
+      gap: var(--space-s);
+    }
+
+    .right {
+      height: auto;
+      gap: 12px;
+    }
+  }
+
+  /* Mobile: alles linksbündig untereinander */
+  @media (max-width: 700px) {
+    .footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-s);
+      padding-top: var(--space-l);
+    }
+
+    /* Reihenfolge: Name → Mail → Links → Back to top */
+    .left {
+      display: contents;
+    }
+
+    .brand {
+      order: 1;
+    }
+
+    .mail {
+      order: 2;
+    }
+
+    .right {
+      order: 3;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 0;
+    }
+
+    .left > :global(.button) {
+      order: 4;
+    }
+
+    .right :global(.nav-link) {
+      margin-left: -15px;
+    }
+  }
+</style>

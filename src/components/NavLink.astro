@@ -1,0 +1,50 @@
+---
+/** Figma: "select" – Default / Hover (Hover = aktiver Menüpunkt) */
+interface Props {
+  href: string;
+  active?: boolean;
+  tone?: 'dark' | 'light';
+}
+
+const { href, active = false, tone = 'dark' } = Astro.props;
+---
+
+<a
+  class:list={['nav-link', `tone-${tone}`, { 'is-active': active }]}
+  href={href}
+  aria-current={active ? 'page' : undefined}
+>
+  <span class="trim"><slot /></span>
+</a>
+
+<style>
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    font-family: var(--f-body);
+    font-size: var(--t-body);
+    line-height: normal;
+    text-align: center;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+
+  .tone-dark {
+    color: var(--c-offblack);
+  }
+
+  .tone-light {
+    color: var(--c-white);
+  }
+
+  .nav-link:hover,
+  .nav-link:focus-visible,
+  .nav-link.is-active {
+    color: var(--c-orange);
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+  }
+</style>

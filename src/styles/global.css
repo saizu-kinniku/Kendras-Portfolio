@@ -1,0 +1,132 @@
+@import '@fontsource/stack-sans-headline/400.css';
+@import '@fontsource/syne/400.css';
+
+/* ---------- Design Tokens (aus Figma) ---------- */
+:root {
+  /* Farben */
+  --c-offblack: #1a010c;
+  --c-orange: #fd8a2f;
+  --c-butter: #fffbde;
+  --c-white: #ffffff;
+  --c-black: #000000;
+  --c-placeholder: #d9d9d9;
+  --c-placeholder-light: #eaeaea;
+
+  /* Schriften */
+  --f-head: 'Stack Sans Headline', system-ui, sans-serif;
+  --f-body: 'Syne', system-ui, sans-serif;
+
+  /* Typo-Stile – skalieren stufenlos, ab ca. 1100–1566px Breite gelten exakt die Figma-Werte */
+  --t-headline: clamp(40px, 22px + 3.72vw, 80px); /* Headline 80 / Zeilenhöhe 130 */
+  --t-name: clamp(32px, 20px + 2.25vw, 55px); /* Name 55 */
+  --t-subline: clamp(26px, 18px + 1.67vw, 44px); /* Subline 44 */
+  --t-body: clamp(16px, 14.5px + 0.36vw, 20px); /* Fliesstext / Buttons 20 */
+  --t-footer-sub: clamp(22px, 16px + 1.03vw, 32px);
+
+  /* Abstände */
+  --page-pad: clamp(20px, 10px + 1.92vw, 40px);
+  --space-xl: clamp(80px, 30px + 8.3vw, 160px); /* grosse Sektionsabstände (160) */
+  --space-l: clamp(48px, 30px + 3.2vw, 80px); /* 80 */
+  --space-m: clamp(32px, 20px + 2.6vw, 60px); /* 60 */
+  --space-s: clamp(24px, 16px + 1.6vw, 40px); /* 40 */
+
+  /* Breakpoints (nur Doku – in Media Queries als Zahl): Tablet ≤ 1100px, Burger ≤ 960px, Mobile ≤ 700px */
+  --radius-card: 30px;
+  --radius-button: 40px;
+  --radius-input: 10px;
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-white);
+  color: var(--c-black);
+  font-family: var(--f-body);
+  font-size: var(--t-body);
+  line-height: normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+  font-weight: 400;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* Figma trimmt Text auf Versalhöhe/Grundlinie (text-box-trim). */
+.trim,
+h1,
+h2,
+h3,
+p {
+  text-box: trim-both cap alphabetic;
+}
+
+/* ---------- Typo-Klassen ---------- */
+.t-headline {
+  font-family: var(--f-head);
+  font-size: var(--t-headline);
+  line-height: 1.625; /* 130 / 80 */
+  text-transform: capitalize;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+.t-name {
+  font-family: var(--f-head);
+  font-size: var(--t-name);
+  line-height: normal;
+}
+
+.t-subline {
+  font-family: var(--f-head);
+  font-size: var(--t-subline);
+  line-height: normal;
+}
+
+.t-body {
+  font-family: var(--f-body);
+  font-size: var(--t-body);
+  line-height: normal;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
