@@ -50,12 +50,17 @@ const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
+/** Bildausschnitt (9er-Raster im CMS) → object-position */
 const focusPositions: Record<string, string> = {
-  center: '50% 50%',
+  'top-left': '0% 0%',
   top: '50% 0%',
-  bottom: '50% 100%',
+  'top-right': '100% 0%',
   left: '0% 50%',
+  center: '50% 50%',
   right: '100% 50%',
+  'bottom-left': '0% 100%',
+  bottom: '50% 100%',
+  'bottom-right': '100% 100%',
 };
 
 /** Öffentliche URL einer hochgeladenen Datei (PDF), Leerzeichen etc. kodiert */

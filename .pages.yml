@@ -30,16 +30,20 @@ content:
           media: images
       - name: heroFocus
         label: Bildausschnitt Hero
-        description: Welcher Teil sichtbar bleibt, wenn das Bild zugeschnitten wird (v. a. auf dem Handy).
+        description: Welcher Teil des Bildes sichtbar bleibt, wenn es zugeschnitten wird (v. a. auf dem Handy). Wähle die Stelle, wo das Wichtigste liegt.
         type: select
         default: center
         options:
           values:
-            - { value: center, label: Mitte }
-            - { value: top, label: Oben }
-            - { value: bottom, label: Unten }
-            - { value: left, label: Links }
-            - { value: right, label: Rechts }
+            - { value: top-left, label: "↖ Oben links" }
+            - { value: top, label: "↑ Oben" }
+            - { value: top-right, label: "↗ Oben rechts" }
+            - { value: left, label: "← Links" }
+            - { value: center, label: "● Mitte" }
+            - { value: right, label: "→ Rechts" }
+            - { value: bottom-left, label: "↙ Unten links" }
+            - { value: bottom, label: "↓ Unten" }
+            - { value: bottom-right, label: "↘ Unten rechts" }
       - name: intro
         label: Introtext
         description: Steht unten links im Hero. Die PDF-Buttons darunter kommen aus „Illustration → Seite“ und „Design → Seite“. Welche Projekte unter „Selected works“ erscheinen, stellst du im jeweiligen Projekt ein.
@@ -70,9 +74,15 @@ content:
             default: center
             options:
               values:
-                - { value: center, label: Mitte }
-                - { value: top, label: Oben }
-                - { value: bottom, label: Unten }
+                - { value: top-left, label: "↖ Oben links" }
+                - { value: top, label: "↑ Oben" }
+                - { value: top-right, label: "↗ Oben rechts" }
+                - { value: left, label: "← Links" }
+                - { value: center, label: "● Mitte" }
+                - { value: right, label: "→ Rechts" }
+                - { value: bottom-left, label: "↙ Unten links" }
+                - { value: bottom, label: "↓ Unten" }
+                - { value: bottom-right, label: "↘ Unten rechts" }
           - &pdf
             name: pdf
             label: PDF-Portfolio
@@ -110,11 +120,15 @@ content:
             default: center
             options:
               values:
-                - { value: center, label: Mitte }
-                - { value: top, label: Oben }
-                - { value: bottom, label: Unten }
-                - { value: left, label: Links }
-                - { value: right, label: Rechts }
+                - { value: top-left, label: "↖ Oben links" }
+                - { value: top, label: "↑ Oben" }
+                - { value: top-right, label: "↗ Oben rechts" }
+                - { value: left, label: "← Links" }
+                - { value: center, label: "● Mitte" }
+                - { value: right, label: "→ Rechts" }
+                - { value: bottom-left, label: "↙ Unten links" }
+                - { value: bottom, label: "↓ Unten" }
+                - { value: bottom-right, label: "↘ Unten rechts" }
           - name: tags
             label: Schlagworte
             description: Klein unter dem Titel auf der Projektkarte, z. B. „Editorial“.
@@ -189,9 +203,15 @@ content:
         default: center
         options:
           values:
-            - { value: center, label: Mitte }
-            - { value: top, label: Oben }
-            - { value: bottom, label: Unten }
+            - { value: top-left, label: "↖ Oben links" }
+            - { value: top, label: "↑ Oben" }
+            - { value: top-right, label: "↗ Oben rechts" }
+            - { value: left, label: "← Links" }
+            - { value: center, label: "● Mitte" }
+            - { value: right, label: "→ Rechts" }
+            - { value: bottom-left, label: "↙ Unten links" }
+            - { value: bottom, label: "↓ Unten" }
+            - { value: bottom-right, label: "↘ Unten rechts" }
       - name: greeting
         label: Begrüssung
         description: Grosse orange Zeile, z. B. „Hello!“.
