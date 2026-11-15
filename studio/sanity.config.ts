@@ -13,7 +13,7 @@ const singletonTypes = new Set<string>(singletons.map((s) => s.type))
 export default defineConfig({
   name: 'default',
   title: 'Kendra Schlegel',
-  basePath: '/studio',
+  // basePath kommt aus sanity.cli.ts (project.basePath)
   projectId,
   dataset,
 
