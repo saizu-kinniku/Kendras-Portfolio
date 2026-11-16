@@ -1,14 +1,18 @@
 {
   "name": "Kendra Schlegel",
-  "address": "Strasse Nr.\nPLZ Ort\nSwitzerland",
+  "address": "Konstanzerstrasse 31\n9500 Wil\nSwitzerland",
   "sections": [
     {
       "title": "Copyright",
-      "text": "All illustrations, designs and images on this website are the property of Kendra Schlegel unless stated otherwise. Any use requires prior written permission."
+      "text": "All illustrations, designs, images and texts on this website are the work of Kendra Schlegel and are protected by copyright, unless stated otherwise.\n\nAny reproduction, editing, distribution or other use beyond private viewing requires prior written permission. For licensing or usage requests, please get in touch by email."
     },
     {
-      "title": "Disclaimer",
-      "text": "The content of this website has been created with care. However, no guarantee is given for the accuracy, completeness or timeliness of the information. Links to external websites are outside our responsibility."
+      "title": "Liability for content",
+      "text": "The content of this website has been created with great care. However, no guarantee is given for the accuracy, completeness or timeliness of the information provided.\n\nLiability claims for damage of a material or immaterial nature arising from access to, use or non-use of the published information are excluded to the extent permitted by law."
+    },
+    {
+      "title": "Liability for links",
+      "text": "This website contains links to external websites, such as Instagram, whose content is beyond my control. Responsibility for the content of linked websites lies solely with their respective operators.\n\nAt the time of linking, no unlawful content was apparent. Access to and use of such websites is at the user's own risk."
     }
   ]
 }
