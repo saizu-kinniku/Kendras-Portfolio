@@ -13,6 +13,22 @@ export interface SiteImage {
   position: string;
 }
 
+/** Hochgeladenes Video (läuft stumm in Schleife) */
+export interface SiteVideo {
+  src: string;
+  type: string;
+}
+
+/** Breite eines Bildes/Videos auf der Projektseite: gross = volle Breite, mittel = ¾, klein = ½ */
+export type MediaWidth = 'large' | 'medium' | 'small';
+
+/** Eintrag in der Galerie einer Projektseite: Bild, Video (Bild dient dann als Vorschaubild) oder beides */
+export interface GalleryItem {
+  image?: SiteImage;
+  video?: SiteVideo;
+  width: MediaWidth;
+}
+
 export interface Project {
   slug: string;
   title: string;
@@ -23,7 +39,9 @@ export interface Project {
   featured: boolean;
   order: number;
   cover?: SiteImage;
-  images: SiteImage[];
+  /** Optional: Video statt Titelbild auf der Projektkarte */
+  coverVideo?: SiteVideo;
+  gallery: GalleryItem[];
 }
 
 export interface Settings {
@@ -39,6 +57,7 @@ export interface Settings {
 
 export interface Home {
   hero?: SiteImage;
+  heroVideo?: SiteVideo;
   intro: string;
   selected: Project[];
 }

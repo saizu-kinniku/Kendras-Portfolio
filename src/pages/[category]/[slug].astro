@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import ArrowLink from '../../components/ArrowLink.astro';
 import Cta from '../../components/Cta.astro';
 import Img from '../../components/Img.astro';
+import Video from '../../components/Video.astro';
 import { categoryLabels, categoryUrl, type Project } from '../../data/projects';
 import { getProjects } from '../../lib/content';
 
@@ -22,6 +23,13 @@ interface Props {
 
 const { project } = Astro.props;
 const other = project.category === 'illustration' ? 'design' : 'illustration';
+
+// Bildbreiten (Galerie max. 1280px): gross = volle Breite, mittel = ¾, klein = ½; auf dem Handy immer volle Breite
+const gallerySizes = {
+  large: '(max-width: 1360px) 100vw, 1280px',
+  medium: '(max-width: 700px) 100vw, (max-width: 1360px) 75vw, 960px',
+  small: '(max-width: 700px) 100vw, (max-width: 1360px) 50vw, 640px',
+};
 ---
 
 <Base title={project.title} active={project.category} description={project.description} image={project.cover}>
@@ -33,9 +41,15 @@ const other = project.category === 'illustration' ? 'design' : 'illustration';
 
     <div class="gallery">
       {
-        project.images.length ? (
-          project.images.map((image, i) => (
-            <Img image={image} sizes="(max-width: 1360px) 100vw, 1280px" loading={i === 0 ? 'eager' : 'lazy'} />
+        project.gallery.length ? (
+          project.gallery.map((item, i) => (
+            <figure class:list={['item', `w-${item.width}`]}>
+              {item.video ? (
+                <Video video={item.video} poster={item.image} controlsFallback eager={i === 0} />
+              ) : (
+                item.image && <Img image={item.image} sizes={gallerySizes[item.width]} loading={i === 0 ? 'eager' : 'lazy'} />
+              )}
+            </figure>
           ))
         ) : (
           <div class="placeholder" aria-hidden="true" />
@@ -84,13 +98,28 @@ const other = project.category === 'illustration' ? 'design' : 'illustration';
   .gallery {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 40px;
     width: 1280px;
     max-width: 100%;
   }
 
-  /* Echte Bilder im Originalformat (nicht beschnitten), Platzhalter 16:9 wie in Figma */
-  .gallery :global(img) {
+  /* Breite wählbar im CMS, Höhe ergibt sich aus dem Originalformat (nicht beschnitten) */
+  .item {
+    width: 100%;
+    margin: 0;
+  }
+
+  .w-medium {
+    width: 75%;
+  }
+
+  .w-small {
+    width: 50%;
+  }
+
+  .gallery :global(img),
+  .gallery :global(video) {
     width: 100%;
     height: auto;
   }
@@ -133,6 +162,11 @@ const other = project.category === 'illustration' ? 'design' : 'illustration';
   @media (max-width: 700px) {
     .gallery {
       gap: 16px;
+    }
+
+    .w-medium,
+    .w-small {
+      width: 100%;
     }
 
     .pager :global(.arrow-link) {

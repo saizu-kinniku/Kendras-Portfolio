@@ -43,8 +43,36 @@ const { href, active = false, tone = 'dark' } = Astro.props;
   .nav-link:focus-visible,
   .nav-link.is-active {
     color: var(--c-orange);
-    text-decoration: underline;
-    text-decoration-thickness: from-font;
-    text-underline-position: from-font;
+  }
+
+  /* Unterstrich wächst beim Hover von links nach rechts (Position/Stärke wie die Unterstreichung der Schrift) */
+  .trim {
+    position: relative;
+  }
+
+  .trim::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 0.11em);
+    height: max(1px, 0.075em);
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .nav-link:hover .trim::after,
+  .nav-link:focus-visible .trim::after,
+  .nav-link.is-active .trim::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trim::after {
+      transition: none;
+    }
   }
 </style>

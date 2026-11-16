@@ -3,23 +3,25 @@
 import cardIcon from '../assets/icons/card-icon.svg';
 import cardIconHover from '../assets/icons/card-icon-hover.svg';
 import Img from './Img.astro';
-import type { SiteImage } from '../data/projects';
+import Video from './Video.astro';
+import type { SiteImage, SiteVideo } from '../data/projects';
 
 interface Props {
   href: string;
   title: string;
   tags: string[];
   image?: SiteImage;
+  video?: SiteVideo;
   size?: 'big' | 'small';
 }
 
-const { href, title, tags, image, size = 'small' } = Astro.props;
+const { href, title, tags, image, video, size = 'small' } = Astro.props;
 const sizes = size === 'big' ? '(max-width: 1080px) 100vw, 1000px' : '(max-width: 700px) 100vw, (max-width: 1400px) 50vw, 613px';
 ---
 
 <a class:list={['card', `card-${size}`]} href={href}>
   <div class="media">
-    {image && <Img class="cover" image={image} sizes={sizes} alt="" />}
+    {video ? <Video class="cover" video={video} poster={image} /> : image && <Img class="cover" image={image} sizes={sizes} alt="" />}
     <span class="icon" aria-hidden="true">
       <img class="icon-base" src={cardIcon.src} width={cardIcon.width} height={cardIcon.height} alt="" />
       <img class="icon-hover" src={cardIconHover.src} width={cardIconHover.width} height={cardIconHover.height} alt="" />
@@ -141,6 +143,12 @@ const sizes = size === 'big' ? '(max-width: 1080px) 100vw, 1000px' : '(max-width
     width: 100%;
     padding: 0 20px;
     color: var(--c-offblack);
+    transition: color 0.25s ease;
+  }
+
+  .card:hover .tags,
+  .card:focus-visible .tags {
+    color: var(--c-orange);
   }
 
   /* Hover: Bildfläche auf 50 % */

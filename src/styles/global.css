@@ -16,8 +16,8 @@
   --f-head: 'Stack Sans Headline', system-ui, sans-serif;
   --f-body: 'Syne', system-ui, sans-serif;
 
-  /* Typo-Stile – skalieren stufenlos, ab ca. 1100–1566px Breite gelten exakt die Figma-Werte */
-  --t-headline: clamp(40px, 22px + 3.72vw, 80px); /* Headline 80 / Zeilenhöhe 130 */
+  /* Typo-Stile (Stack Sans: Zeilenhöhe 115 %) – skalieren stufenlos, ab ca. 1100–1566px Breite gelten exakt die Figma-Werte */
+  --t-headline: clamp(40px, 22px + 3.72vw, 80px); /* Headline 80 */
   --t-name: clamp(32px, 20px + 2.25vw, 55px); /* Name 55 */
   --t-subline: clamp(26px, 18px + 1.67vw, 44px); /* Subline 44 */
   --t-body: clamp(16px, 14.5px + 0.36vw, 20px); /* Fliesstext / Buttons 20 */
@@ -46,53 +46,73 @@
 }
 
 /* ---------- Seitenübergänge ---------- */
-/* Zwischen Seiten: weicher Überblend-Effekt (Chrome, Edge, Safari; andere Browser wechseln normal) */
+/* Seitenwechsel nacheinander statt überlagert: alte Seite blendet kurz aus, danach die neue ein.
+   Die Navigation bleibt stehen. (Chrome, Edge, Safari; andere Browser wechseln normal) */
 @view-transition {
   navigation: auto;
 }
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.45s;
-  animation-timing-function: ease;
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
 }
 
-/* Beim Laden: Inhalt blendet sanft ein */
-@keyframes page-in {
+@keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 
-body > main,
-body > footer {
-  animation: page-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+::view-transition-old(root) {
+  animation: fade-out 0.18s ease-in both;
 }
 
-/* Die Navigation bleibt beim Seitenwechsel stehen (kein Überblenden, kein Zucken) */
+::view-transition-new(root) {
+  animation: fade-in 0.4s ease-out 0.14s both;
+}
+
 body > header {
   view-transition-name: site-header;
 }
 
+::view-transition-group(site-header),
 ::view-transition-old(site-header),
 ::view-transition-new(site-header) {
   animation: none;
 }
 
+/* Erster Aufruf: Inhalt blendet ein (ohne Bewegung, damit sich nichts überlagert) */
+body > main,
+body > footer {
+  animation: fade-in 0.5s ease-out both;
+}
+
+html.vt body > main,
+html.vt body > footer {
+  animation: none;
+}
+
+/* Bilder erscheinen weich, sobald sie geladen sind (siehe Base.astro) */
+.js .img-fade {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.js .img-fade.is-loaded {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   body > main,
-  body > footer {
-    animation: none;
-  }
-
+  body > footer,
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none;
+  }
+
+  .js .img-fade {
+    transition: none;
   }
 }
 
@@ -156,7 +176,7 @@ p {
 .t-headline {
   font-family: var(--f-head);
   font-size: var(--t-headline);
-  line-height: 1.625; /* 130 / 80 */
+  line-height: 1.15;
   text-transform: capitalize;
 }
 
@@ -168,13 +188,13 @@ body {
 .t-name {
   font-family: var(--f-head);
   font-size: var(--t-name);
-  line-height: normal;
+  line-height: 1.15;
 }
 
 .t-subline {
   font-family: var(--f-head);
   font-size: var(--t-subline);
-  line-height: normal;
+  line-height: 1.15;
 }
 
 .t-body {

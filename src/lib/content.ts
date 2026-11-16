@@ -1,7 +1,18 @@
 // Lädt die Inhalte aus src/content/ (bearbeitet mit Pages CMS) und optimiert die Bilder.
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-import type { About, Category, Home, Legal, Project, Settings, SiteImage } from '../data/projects';
+import type {
+  About,
+  Category,
+  GalleryItem,
+  Home,
+  Legal,
+  MediaWidth,
+  Project,
+  Settings,
+  SiteImage,
+  SiteVideo,
+} from '../data/projects';
 
 /* ---------------- Rohdaten ---------------- */
 
@@ -63,11 +74,25 @@ const focusPositions: Record<string, string> = {
   'bottom-right': '100% 100%',
 };
 
-/** Öffentliche URL einer hochgeladenen Datei (PDF), Leerzeichen etc. kodiert */
+/** Öffentliche URL einer hochgeladenen Datei (PDF, Video), Leerzeichen etc. kodiert */
 const fileUrl = (v: unknown) => {
   const s = text(v);
   return s ? encodeURI(decodeURI(s)) : undefined;
 };
+
+/* ---------------- Videos ---------------- */
+
+const videoTypes: Record<string, string> = { mp4: 'video/mp4', m4v: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime' };
+
+/** "/videos/foo.mp4" (liegt in public/videos) → Video-Quelle */
+function toVideo(path: unknown): SiteVideo | undefined {
+  const src = fileUrl(path);
+  if (!src) return undefined;
+  const ext = src.split('.').pop()?.toLowerCase() ?? '';
+  return { src, type: videoTypes[ext] ?? 'video/mp4' };
+}
+
+const widths: MediaWidth[] = ['large', 'medium', 'small'];
 
 /* ---------------- Bilder ---------------- */
 
@@ -129,13 +154,20 @@ export const getProjects = memo(async (): Promise<Project[]> => {
         featured: fm.featured === true,
         order: Number.isFinite(Number(fm.order)) && fm.order !== '' && fm.order !== null ? Number(fm.order) : 999,
         cover: await toImage(fm.cover, '', fm.coverFocus),
-        images: (
+        coverVideo: toVideo(fm.coverVideo),
+        gallery: (
           await Promise.all(
-            (Array.isArray(fm.gallery) ? fm.gallery : []).map((g: unknown, i: number) =>
-              toImage(g, `${title} – ${i + 1}`),
-            ),
+            (Array.isArray(fm.gallery) ? fm.gallery : []).map(async (g: any, i: number): Promise<GalleryItem> => {
+              // früheres Format: nur Bildpfad
+              const entry = typeof g === 'string' ? { image: g } : (g ?? {});
+              return {
+                image: await toImage(entry.image, `${title} – ${i + 1}`, entry.focus),
+                video: toVideo(entry.video),
+                width: widths.includes(entry.width) ? entry.width : 'large',
+              };
+            }),
           )
-        ).filter(Boolean) as SiteImage[],
+        ).filter((item) => item.image || item.video),
       } satisfies Project;
     }),
   );
@@ -172,6 +204,7 @@ export const getHome = memo(async (): Promise<Home> => {
   const featured = projects.filter((p) => p.featured);
   return {
     hero: await toImage(h.heroImage, '', h.heroFocus),
+    heroVideo: toVideo(h.heroVideo),
     intro: text(h.intro),
     // Projekte mit „Auf der Startseite zeigen“; sonst die ersten drei
     selected: featured.length ? featured : projects.slice(0, 3),

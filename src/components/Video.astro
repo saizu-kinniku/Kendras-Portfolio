@@ -1,0 +1,70 @@
+---
+/**
+ * Video aus dem CMS: läuft stumm in Schleife, sobald es sichtbar ist (pausiert ausserhalb).
+ * Ein Bild dazu dient als Vorschaubild und gibt das Seitenverhältnis vor.
+ * Bei „Bewegung reduzieren“ startet es nicht von selbst; Galerievideos zeigen dann Bedienelemente.
+ */
+import type { SiteImage, SiteVideo } from '../data/projects';
+
+interface Props {
+  video: SiteVideo;
+  poster?: SiteImage;
+  class?: string;
+  /** Bedienelemente anbieten, wenn nicht automatisch abgespielt wird */
+  controlsFallback?: boolean;
+  /** Sofort laden (z. B. Hero) */
+  eager?: boolean;
+}
+
+const { video, poster, class: className, controlsFallback = false, eager = false } = Astro.props;
+---
+
+<video
+  class:list={['site-video', className]}
+  muted
+  loop
+  playsinline
+  disablepictureinpicture
+  preload={eager ? 'auto' : 'metadata'}
+  poster={poster?.src}
+  width={poster?.width}
+  height={poster?.height}
+  style={poster ? `object-position: ${poster.position}` : undefined}
+  data-autoplay
+  data-controls-fallback={controlsFallback ? '' : undefined}
+  aria-hidden={controlsFallback ? undefined : 'true'}
+>
+  <source src={video.src} type={video.type} />
+</video>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const videos = document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]');
+
+  if (reduce) {
+    videos.forEach((v) => {
+      if (v.hasAttribute('data-controls-fallback')) v.controls = true;
+    });
+  } else {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(({ target, isIntersecting }) => {
+          const v = target as HTMLVideoElement;
+          if (isIntersecting) v.play().catch(() => {});
+          else v.pause();
+        });
+      },
+      { rootMargin: '200px 0px' },
+    );
+    videos.forEach((v) => observer.observe(v));
+  }
+</script>
+
+<style>
+  .site-video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    background: var(--c-placeholder-light);
+  }
+</style>

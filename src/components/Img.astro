@@ -16,7 +16,7 @@ const { image, sizes, class: className, loading = 'lazy', priority = false, alt 
 ---
 
 <img
-  class={className}
+  class:list={['img-fade', className]}
   src={image.src}
   srcset={image.srcset}
   sizes={sizes}

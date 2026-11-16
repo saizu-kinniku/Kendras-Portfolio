@@ -34,7 +34,7 @@ const header = settings.headers[category];
     <div class="grid">
       {
         items.map((p) => (
-          <ProjectCard size="small" href={projectUrl(p)} title={p.title} tags={p.tags} image={p.cover} />
+          <ProjectCard size="small" href={projectUrl(p)} title={p.title} tags={p.tags} image={p.cover} video={p.coverVideo} />
         ))
       }
     </div>

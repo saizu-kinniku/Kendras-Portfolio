@@ -43,6 +43,14 @@ const ogImage = image ? image.src.replace(/w=\d+/, 'w=1200') : undefined;
     {canonical && <link rel="canonical" href={canonical} />}
     {noindex && <meta name="robots" content="noindex" />}
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <script is:inline>
+      // Für Einblend-Effekte (ohne JavaScript bleibt alles sofort sichtbar)
+      document.documentElement.classList.add('js');
+      // Beim Seitenwechsel übernimmt der Überblend-Effekt – dann keine zusätzliche Einblendung
+      addEventListener('pagereveal', (e) => {
+        if (e.viewTransition) document.documentElement.classList.add('vt');
+      });
+    </script>
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Kendra Schlegel" />
@@ -62,8 +70,42 @@ const ogImage = image ? image.src.replace(/w=\d+/, 'w=1200') : undefined;
   </body>
 </html>
 
+<script>
+  import Lenis from 'lenis';
+  import 'lenis/dist/lenis.css';
+
+  // Bilder blenden weich ein, sobald sie geladen sind (bereits geladene erscheinen sofort)
+  document.querySelectorAll<HTMLImageElement>('img.img-fade').forEach((img) => {
+    const show = () => img.classList.add('is-loaded');
+    if (img.complete && img.naturalWidth) {
+      img.style.transition = 'none';
+      show();
+      requestAnimationFrame(() => img.style.removeProperty('transition'));
+    } else {
+      img.addEventListener('load', show, { once: true });
+      img.addEventListener('error', show, { once: true });
+    }
+  });
+
+  // Leichtes Smooth Scrolling (Mausrad/Trackpad; Touch bleibt nativ)
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const lenis = new Lenis({ lerp: 0.12, anchors: true, autoRaf: true });
+    // Mobiles Menü offen → Seite darunter nicht scrollen
+    new MutationObserver(() => {
+      if (document.documentElement.classList.contains('menu-open')) lenis.stop();
+      else lenis.start();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  }
+</script>
+
 <style is:global>
   html {
     scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 </style>

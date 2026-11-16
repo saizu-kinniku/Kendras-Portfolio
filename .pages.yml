@@ -8,6 +8,11 @@ media:
     input: src/assets/uploads
     output: /uploads
     extensions: [jpg, jpeg, png, webp, avif, gif]
+  - name: videos
+    label: Videos
+    input: public/videos
+    output: /videos
+    extensions: [mp4, webm, mov, m4v]
   - name: files
     label: PDFs
     input: public/files
@@ -44,6 +49,12 @@ content:
             - { value: bottom-left, label: "↙ Unten links" }
             - { value: bottom, label: "↓ Unten" }
             - { value: bottom-right, label: "↘ Unten rechts" }
+      - name: heroVideo
+        label: Hero-Video (optional)
+        description: Läuft stumm in Schleife statt des Hero-Bildes; das Hero-Bild wird dann als Vorschaubild gezeigt. MP4, max. 25 MB.
+        type: file
+        options:
+          media: videos
       - name: intro
         label: Introtext
         description: Steht unten links im Hero. Die PDF-Buttons darunter kommen aus „Illustration → Seite“ und „Design → Seite“. Welche Projekte unter „Selected works“ erscheinen, stellst du im jeweiligen Projekt ein.
@@ -129,6 +140,12 @@ content:
                 - { value: bottom-left, label: "↙ Unten links" }
                 - { value: bottom, label: "↓ Unten" }
                 - { value: bottom-right, label: "↘ Unten rechts" }
+          - name: coverVideo
+            label: Titelvideo (optional)
+            description: Läuft stumm in Schleife auf der Projektkarte statt des Titelbilds; das Titelbild dient als Vorschaubild. MP4, max. 25 MB.
+            type: file
+            options:
+              media: videos
           - name: tags
             label: Schlagworte
             description: Klein unter dem Titel auf der Projektkarte, z. B. „Editorial“.
@@ -149,12 +166,33 @@ content:
             description: Kurzer Text unter dem Titel auf der Projektseite.
             type: text
           - name: gallery
-            label: Bilder
-            description: Bilder auf der Projektseite, untereinander in voller Breite und im Originalformat. Reihenfolge per Drag & Drop.
-            type: image
+            label: Bilder & Videos
+            description: Inhalt der Projektseite, untereinander und mittig. Reihenfolge per Drag & Drop.
+            type: object
             list: true
-            options:
-              media: images
+            fields:
+              - name: image
+                label: Bild
+                description: Bei einem Video optional – wird als Vorschaubild gezeigt, bis das Video lädt.
+                type: image
+                options:
+                  media: images
+              - name: video
+                label: Video (optional)
+                description: Läuft stumm in Schleife. MP4, max. 25 MB.
+                type: file
+                options:
+                  media: videos
+              - name: width
+                label: Breite
+                description: Die Höhe ergibt sich aus dem Format. Hochformate eher mittel oder klein. Auf dem Handy immer volle Breite.
+                type: select
+                default: large
+                options:
+                  values:
+                    - { value: large, label: "Gross – volle Breite" }
+                    - { value: medium, label: "Mittel – ¾ Breite" }
+                    - { value: small, label: "Klein – ½ Breite" }
 
   # ---------------- Design ----------------
   - name: design

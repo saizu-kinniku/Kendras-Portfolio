@@ -103,7 +103,8 @@ const { email } = await getSettings();
     flex-direction: column;
     justify-content: center;
     min-width: 0;
-    padding: 0 40px;
+    /* Text beginnt an derselben Kante wie der Schriftzug in der Navigation */
+    padding: 0 40px 0 0;
   }
 
   .text {
@@ -114,8 +115,9 @@ const { email } = await getSettings();
     color: var(--c-orange);
     font-family: var(--f-head);
     font-size: var(--t-headline);
-    line-height: 1.625;
+    line-height: 1.15;
     text-box: trim-start cap alphabetic;
+    margin-bottom: 0.24em; /* gleicher Abstand zur Einleitung wie vorher mit 130er Zeilenhöhe */
   }
 
   .lead,
@@ -150,7 +152,7 @@ const { email } = await getSettings();
   .portrait {
     flex-shrink: 0;
     align-self: flex-start;
-    width: min(644px, 45%);
+    width: min(720px, 48%);
     aspect-ratio: 644 / 928;
     background: var(--c-placeholder);
   }
