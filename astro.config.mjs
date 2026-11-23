@@ -3,8 +3,8 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  // Hauptadresse der Website – in Cloudflare als Umgebungsvariable SITE_URL setzen, sobald die Domain steht
-  site: process.env.SITE_URL || 'https://kendras-portfolio.pages.dev',
+  // Hauptadresse der Website (für Sitemap, Canonical-Link und Link-Vorschauen)
+  site: 'https://kendraschlegel.com',
   integrations: [
     sitemap({
       filter: (page) => !/\/404\/?$/.test(page),

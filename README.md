@@ -1,6 +1,6 @@
 # Kendra Schlegel – Portfolio
 
-Astro-Website, Inhalte als Dateien im Repo, bearbeitet mit **Pages CMS**, gehostet auf **Cloudflare Pages**.
+Astro-Website (https://kendraschlegel.com), Inhalte als Dateien im Repo, bearbeitet mit **Pages CMS**, gehostet auf **Cloudflare Pages**.
 
 ```
 src/content/pages/*.json        Startseite, Übersichtsseiten, About, Impressum, Kontakt-Block, Footer
@@ -57,7 +57,7 @@ npm run build    # statischer Build nach dist/
    - Build command: `npm run build`
    - Build output directory: `dist`
 4. **Save and Deploy**
-5. Später mit eigener Domain: unter **Settings → Variables** `SITE_URL=https://<domain>` setzen (für Sitemap und Link-Vorschauen)
+5. Domain: `kendraschlegel.com` (Nameserver bei Strato → Cloudflare), unter **Custom domains** mit und ohne www verbunden. Die Adresse steht in `astro.config.mjs` (`site`).
 
 Node-Version kommt aus `.node-version`.
 
